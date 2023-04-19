@@ -1,0 +1,28 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/cona/CoNA_Navi/install/include/**",
+        "/home/cona/CoNA_Navi/devel/include/**",
+        "/home/cona/CoNA-Robots/devel/include/**",
+        "/opt/ros/noetic/include/**",
+        "/home/cona/CoNA-Robots/src/ls01b_v2/include/**",
+        "/home/cona/CoNA-Robots/src/lslidar_driver/include/**",
+        "/home/cona/CoNA-Robots/src/lsm10_ros/include/**",
+        "/home/cona/Direct/src/semi_dense/include/**",
+        "/home/cona/CoNA-Robots/src/servinggo/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}
