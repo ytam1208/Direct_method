@@ -57,9 +57,48 @@ include semi_dense/CMakeFiles/semi_dense_node.dir/progress.make
 # Include the compile flags for this target's objects.
 include semi_dense/CMakeFiles/semi_dense_node.dir/flags.make
 
+semi_dense/CMakeFiles/semi_dense_node.dir/src/callback.cpp.o: semi_dense/CMakeFiles/semi_dense_node.dir/flags.make
+semi_dense/CMakeFiles/semi_dense_node.dir/src/callback.cpp.o: /home/cona/Direct/src/semi_dense/src/callback.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cona/Direct/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object semi_dense/CMakeFiles/semi_dense_node.dir/src/callback.cpp.o"
+	cd /home/cona/Direct/build/semi_dense && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/semi_dense_node.dir/src/callback.cpp.o -c /home/cona/Direct/src/semi_dense/src/callback.cpp
+
+semi_dense/CMakeFiles/semi_dense_node.dir/src/callback.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/semi_dense_node.dir/src/callback.cpp.i"
+	cd /home/cona/Direct/build/semi_dense && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/cona/Direct/src/semi_dense/src/callback.cpp > CMakeFiles/semi_dense_node.dir/src/callback.cpp.i
+
+semi_dense/CMakeFiles/semi_dense_node.dir/src/callback.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/semi_dense_node.dir/src/callback.cpp.s"
+	cd /home/cona/Direct/build/semi_dense && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/cona/Direct/src/semi_dense/src/callback.cpp -o CMakeFiles/semi_dense_node.dir/src/callback.cpp.s
+
+semi_dense/CMakeFiles/semi_dense_node.dir/src/EdgeSE3ProjectDirect.cpp.o: semi_dense/CMakeFiles/semi_dense_node.dir/flags.make
+semi_dense/CMakeFiles/semi_dense_node.dir/src/EdgeSE3ProjectDirect.cpp.o: /home/cona/Direct/src/semi_dense/src/EdgeSE3ProjectDirect.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cona/Direct/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object semi_dense/CMakeFiles/semi_dense_node.dir/src/EdgeSE3ProjectDirect.cpp.o"
+	cd /home/cona/Direct/build/semi_dense && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/semi_dense_node.dir/src/EdgeSE3ProjectDirect.cpp.o -c /home/cona/Direct/src/semi_dense/src/EdgeSE3ProjectDirect.cpp
+
+semi_dense/CMakeFiles/semi_dense_node.dir/src/EdgeSE3ProjectDirect.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/semi_dense_node.dir/src/EdgeSE3ProjectDirect.cpp.i"
+	cd /home/cona/Direct/build/semi_dense && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/cona/Direct/src/semi_dense/src/EdgeSE3ProjectDirect.cpp > CMakeFiles/semi_dense_node.dir/src/EdgeSE3ProjectDirect.cpp.i
+
+semi_dense/CMakeFiles/semi_dense_node.dir/src/EdgeSE3ProjectDirect.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/semi_dense_node.dir/src/EdgeSE3ProjectDirect.cpp.s"
+	cd /home/cona/Direct/build/semi_dense && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/cona/Direct/src/semi_dense/src/EdgeSE3ProjectDirect.cpp -o CMakeFiles/semi_dense_node.dir/src/EdgeSE3ProjectDirect.cpp.s
+
+semi_dense/CMakeFiles/semi_dense_node.dir/src/semi_dense.cpp.o: semi_dense/CMakeFiles/semi_dense_node.dir/flags.make
+semi_dense/CMakeFiles/semi_dense_node.dir/src/semi_dense.cpp.o: /home/cona/Direct/src/semi_dense/src/semi_dense.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cona/Direct/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object semi_dense/CMakeFiles/semi_dense_node.dir/src/semi_dense.cpp.o"
+	cd /home/cona/Direct/build/semi_dense && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/semi_dense_node.dir/src/semi_dense.cpp.o -c /home/cona/Direct/src/semi_dense/src/semi_dense.cpp
+
+semi_dense/CMakeFiles/semi_dense_node.dir/src/semi_dense.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/semi_dense_node.dir/src/semi_dense.cpp.i"
+	cd /home/cona/Direct/build/semi_dense && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/cona/Direct/src/semi_dense/src/semi_dense.cpp > CMakeFiles/semi_dense_node.dir/src/semi_dense.cpp.i
+
+semi_dense/CMakeFiles/semi_dense_node.dir/src/semi_dense.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/semi_dense_node.dir/src/semi_dense.cpp.s"
+	cd /home/cona/Direct/build/semi_dense && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/cona/Direct/src/semi_dense/src/semi_dense.cpp -o CMakeFiles/semi_dense_node.dir/src/semi_dense.cpp.s
+
 semi_dense/CMakeFiles/semi_dense_node.dir/src/main.cpp.o: semi_dense/CMakeFiles/semi_dense_node.dir/flags.make
 semi_dense/CMakeFiles/semi_dense_node.dir/src/main.cpp.o: /home/cona/Direct/src/semi_dense/src/main.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cona/Direct/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object semi_dense/CMakeFiles/semi_dense_node.dir/src/main.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cona/Direct/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object semi_dense/CMakeFiles/semi_dense_node.dir/src/main.cpp.o"
 	cd /home/cona/Direct/build/semi_dense && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/semi_dense_node.dir/src/main.cpp.o -c /home/cona/Direct/src/semi_dense/src/main.cpp
 
 semi_dense/CMakeFiles/semi_dense_node.dir/src/main.cpp.i: cmake_force
@@ -72,11 +111,17 @@ semi_dense/CMakeFiles/semi_dense_node.dir/src/main.cpp.s: cmake_force
 
 # Object files for target semi_dense_node
 semi_dense_node_OBJECTS = \
+"CMakeFiles/semi_dense_node.dir/src/callback.cpp.o" \
+"CMakeFiles/semi_dense_node.dir/src/EdgeSE3ProjectDirect.cpp.o" \
+"CMakeFiles/semi_dense_node.dir/src/semi_dense.cpp.o" \
 "CMakeFiles/semi_dense_node.dir/src/main.cpp.o"
 
 # External object files for target semi_dense_node
 semi_dense_node_EXTERNAL_OBJECTS =
 
+/home/cona/Direct/devel/lib/semi_dense/semi_dense_node: semi_dense/CMakeFiles/semi_dense_node.dir/src/callback.cpp.o
+/home/cona/Direct/devel/lib/semi_dense/semi_dense_node: semi_dense/CMakeFiles/semi_dense_node.dir/src/EdgeSE3ProjectDirect.cpp.o
+/home/cona/Direct/devel/lib/semi_dense/semi_dense_node: semi_dense/CMakeFiles/semi_dense_node.dir/src/semi_dense.cpp.o
 /home/cona/Direct/devel/lib/semi_dense/semi_dense_node: semi_dense/CMakeFiles/semi_dense_node.dir/src/main.cpp.o
 /home/cona/Direct/devel/lib/semi_dense/semi_dense_node: semi_dense/CMakeFiles/semi_dense_node.dir/build.make
 /home/cona/Direct/devel/lib/semi_dense/semi_dense_node: /opt/ros/noetic/lib/libcv_bridge.so
@@ -202,7 +247,7 @@ semi_dense_node_EXTERNAL_OBJECTS =
 /home/cona/Direct/devel/lib/semi_dense/semi_dense_node: /usr/lib/x86_64-linux-gnu/libopencv_imgproc.so.4.2.0
 /home/cona/Direct/devel/lib/semi_dense/semi_dense_node: /usr/lib/x86_64-linux-gnu/libopencv_core.so.4.2.0
 /home/cona/Direct/devel/lib/semi_dense/semi_dense_node: semi_dense/CMakeFiles/semi_dense_node.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/cona/Direct/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable /home/cona/Direct/devel/lib/semi_dense/semi_dense_node"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/cona/Direct/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable /home/cona/Direct/devel/lib/semi_dense/semi_dense_node"
 	cd /home/cona/Direct/build/semi_dense && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/semi_dense_node.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

@@ -857,6 +857,60 @@ tf_generate_messages_nodejs/fast:
 	cd /home/cona/Direct/build && $(MAKE) -f semi_dense/CMakeFiles/tf_generate_messages_nodejs.dir/build.make semi_dense/CMakeFiles/tf_generate_messages_nodejs.dir/build
 .PHONY : tf_generate_messages_nodejs/fast
 
+src/EdgeSE3ProjectDirect.o: src/EdgeSE3ProjectDirect.cpp.o
+
+.PHONY : src/EdgeSE3ProjectDirect.o
+
+# target to build an object file
+src/EdgeSE3ProjectDirect.cpp.o:
+	cd /home/cona/Direct/build && $(MAKE) -f semi_dense/CMakeFiles/semi_dense_node.dir/build.make semi_dense/CMakeFiles/semi_dense_node.dir/src/EdgeSE3ProjectDirect.cpp.o
+.PHONY : src/EdgeSE3ProjectDirect.cpp.o
+
+src/EdgeSE3ProjectDirect.i: src/EdgeSE3ProjectDirect.cpp.i
+
+.PHONY : src/EdgeSE3ProjectDirect.i
+
+# target to preprocess a source file
+src/EdgeSE3ProjectDirect.cpp.i:
+	cd /home/cona/Direct/build && $(MAKE) -f semi_dense/CMakeFiles/semi_dense_node.dir/build.make semi_dense/CMakeFiles/semi_dense_node.dir/src/EdgeSE3ProjectDirect.cpp.i
+.PHONY : src/EdgeSE3ProjectDirect.cpp.i
+
+src/EdgeSE3ProjectDirect.s: src/EdgeSE3ProjectDirect.cpp.s
+
+.PHONY : src/EdgeSE3ProjectDirect.s
+
+# target to generate assembly for a file
+src/EdgeSE3ProjectDirect.cpp.s:
+	cd /home/cona/Direct/build && $(MAKE) -f semi_dense/CMakeFiles/semi_dense_node.dir/build.make semi_dense/CMakeFiles/semi_dense_node.dir/src/EdgeSE3ProjectDirect.cpp.s
+.PHONY : src/EdgeSE3ProjectDirect.cpp.s
+
+src/callback.o: src/callback.cpp.o
+
+.PHONY : src/callback.o
+
+# target to build an object file
+src/callback.cpp.o:
+	cd /home/cona/Direct/build && $(MAKE) -f semi_dense/CMakeFiles/semi_dense_node.dir/build.make semi_dense/CMakeFiles/semi_dense_node.dir/src/callback.cpp.o
+.PHONY : src/callback.cpp.o
+
+src/callback.i: src/callback.cpp.i
+
+.PHONY : src/callback.i
+
+# target to preprocess a source file
+src/callback.cpp.i:
+	cd /home/cona/Direct/build && $(MAKE) -f semi_dense/CMakeFiles/semi_dense_node.dir/build.make semi_dense/CMakeFiles/semi_dense_node.dir/src/callback.cpp.i
+.PHONY : src/callback.cpp.i
+
+src/callback.s: src/callback.cpp.s
+
+.PHONY : src/callback.s
+
+# target to generate assembly for a file
+src/callback.cpp.s:
+	cd /home/cona/Direct/build && $(MAKE) -f semi_dense/CMakeFiles/semi_dense_node.dir/build.make semi_dense/CMakeFiles/semi_dense_node.dir/src/callback.cpp.s
+.PHONY : src/callback.cpp.s
+
 src/main.o: src/main.cpp.o
 
 .PHONY : src/main.o
@@ -883,6 +937,33 @@ src/main.s: src/main.cpp.s
 src/main.cpp.s:
 	cd /home/cona/Direct/build && $(MAKE) -f semi_dense/CMakeFiles/semi_dense_node.dir/build.make semi_dense/CMakeFiles/semi_dense_node.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
+
+src/semi_dense.o: src/semi_dense.cpp.o
+
+.PHONY : src/semi_dense.o
+
+# target to build an object file
+src/semi_dense.cpp.o:
+	cd /home/cona/Direct/build && $(MAKE) -f semi_dense/CMakeFiles/semi_dense_node.dir/build.make semi_dense/CMakeFiles/semi_dense_node.dir/src/semi_dense.cpp.o
+.PHONY : src/semi_dense.cpp.o
+
+src/semi_dense.i: src/semi_dense.cpp.i
+
+.PHONY : src/semi_dense.i
+
+# target to preprocess a source file
+src/semi_dense.cpp.i:
+	cd /home/cona/Direct/build && $(MAKE) -f semi_dense/CMakeFiles/semi_dense_node.dir/build.make semi_dense/CMakeFiles/semi_dense_node.dir/src/semi_dense.cpp.i
+.PHONY : src/semi_dense.cpp.i
+
+src/semi_dense.s: src/semi_dense.cpp.s
+
+.PHONY : src/semi_dense.s
+
+# target to generate assembly for a file
+src/semi_dense.cpp.s:
+	cd /home/cona/Direct/build && $(MAKE) -f semi_dense/CMakeFiles/semi_dense_node.dir/build.make semi_dense/CMakeFiles/semi_dense_node.dir/src/semi_dense.cpp.s
+.PHONY : src/semi_dense.cpp.s
 
 # Help Target
 help:
@@ -943,9 +1024,18 @@ help:
 	@echo "... actionlib_generate_messages_cpp"
 	@echo "... rosgraph_msgs_generate_messages_nodejs"
 	@echo "... tf_generate_messages_nodejs"
+	@echo "... src/EdgeSE3ProjectDirect.o"
+	@echo "... src/EdgeSE3ProjectDirect.i"
+	@echo "... src/EdgeSE3ProjectDirect.s"
+	@echo "... src/callback.o"
+	@echo "... src/callback.i"
+	@echo "... src/callback.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/semi_dense.o"
+	@echo "... src/semi_dense.i"
+	@echo "... src/semi_dense.s"
 .PHONY : help
 
 
