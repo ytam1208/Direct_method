@@ -50,6 +50,6 @@ int main(int argc, char** argv)
     }
     Semi_Direct sd(cam_intrinsic, mc);
 
-    // ros::spin();
+    ros::spin();
     return 0;
 }

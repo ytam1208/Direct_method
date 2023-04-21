@@ -22,7 +22,8 @@ class GET_PARAM : public CAMERA_INTRINSIC_PARAM
 {
     public:
         int show;
-        
+        float depth_range_min = 0.0f;
+        float depth_range_max = 5.0f;
     public:
         GET_PARAM():
         show(false){}

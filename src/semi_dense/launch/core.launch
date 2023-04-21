@@ -3,5 +3,6 @@
 	<rosparam command="load" file="$(find semi_dense)/launch/config/param.yaml" />
 	<node name="semi_dense" pkg="semi_dense" type="semi_dense_node" output="screen" /> 
 
+        <node pkg="rosbag" type="play" name="player" args="--clock /home/cona/test.bag" />
 
 </launch>

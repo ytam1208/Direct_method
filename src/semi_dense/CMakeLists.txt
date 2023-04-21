@@ -19,6 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   tf2
   tf_conversions
+  pcl_ros 
 )
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
@@ -117,7 +118,7 @@ find_package(Sophus REQUIRED)
 catkin_package(
  INCLUDE_DIRS include
 #  LIBRARIES semi_dense
- CATKIN_DEPENDS cv_bridge roscpp sensor_msgs std_msgs tf tf2 tf_conversions
+ CATKIN_DEPENDS cv_bridge roscpp sensor_msgs std_msgs tf tf2 tf_conversions pcl_ros 
 #  DEPENDS system_lib
 )
 
