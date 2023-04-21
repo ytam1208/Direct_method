@@ -151,19 +151,19 @@ bool Semi_Direct::PoseEstimationDirect(){
 }
 
 void Semi_Direct::runloop(SYNC::CALLBACK** _data){
-    ros::Rate loop_rate(30);
+    ros::Rate loop_rate(10);
     bool first_index = false;
-    // while(ros::ok()){
-    //     ros::spinOnce();
-    //     loop_rate.sleep();
+    while(ros::ok()){
+        ros::spinOnce();
+        loop_rate.sleep();
         
-    //     if(!Get_data(_data)) continue;
-    //     compute_gradient(&first_index);
-    //     std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
-    //     PoseEstimationDirect();
-    //     std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
-    //     std::chrono::duration<double> time_used = std::chrono::duration_cast<std::chrono::duration<double>> (t2-t1);
-    //     std::cout << "direct method costs time: " << time_used.count() << " seconds." << std::endl;
-    //     Display_Feature();
-    // }
+        if(!Get_data(_data)) continue;
+        compute_gradient(&first_index);
+        std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+        PoseEstimationDirect();
+        std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+        std::chrono::duration<double> time_used = std::chrono::duration_cast<std::chrono::duration<double>> (t2-t1);
+        std::cout << "direct method costs time: " << time_used.count() << " seconds." << std::endl;
+        Display_Feature();
+    }
 }

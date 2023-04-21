@@ -14,7 +14,7 @@ cv_bridge::CvImagePtr SYNC::CALLBACK::Convert_Pcl2_to_XYZ(const sensor_msgs::Poi
         if(Input_img == nullptr) throw;
         int point_size = Input_img->width * Input_img->height;
         if(point_size < 10 ) throw; 
-        std::cout << "Point size = " << point_size << std::endl;
+        // std::cout << "Point size = " << point_size << std::endl;
         sensor_msgs::PointCloud2ConstIterator<float> iter_x((*Input_img), "x");
         sensor_msgs::PointCloud2ConstIterator<float> iter_y((*Input_img), "y");
         sensor_msgs::PointCloud2ConstIterator<float> iter_z((*Input_img), "z");
