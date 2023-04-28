@@ -16,12 +16,13 @@ class Semi_Direct: public CAMERA_INTRINSIC_PARAM
         cv::Mat curr_color, curr_depth, curr_gray;
         cv::Mat prev_color;
         Eigen::Matrix3f K;
+        Eigen::Vector4f trans;
+        Eigen::Quaternionf rotation;
         Eigen::Isometry3d Tcw;  //Camera Pose(RT)
         std::vector<Measurement> measurements;
     private:
         EdgeSE3ProjectDirect ES3;
         std::mutex data_mtx;
-        std::mutex optimi_mtx;
     public:    
         void initalize(std::vector<double>& c_i);
         bool Get_data(SYNC::CALLBACK** _data);

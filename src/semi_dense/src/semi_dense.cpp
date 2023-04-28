@@ -11,8 +11,9 @@ void Semi_Direct::initalize(std::vector<double>& c_i){
     fx = c_i[2];
     fy = c_i[3];
     depth_scale = c_i[4];
+    // depth_scale = 1;
     ROS_INFO("Initalize Cam_Param Get!!!");
-    ROS_INFO("cx=%lf, cy=%lf, fx=%lf, fy=%lf, depth_Scale=%lf", c_i[0], c_i[1], c_i[2], c_i[3], c_i[4]);
+    ROS_INFO("cx=%lf, cy=%lf, fx=%lf, fy=%lf, depth_Scale=%lf", cx, cy, fx, fy, depth_scale);
 
     srand((unsigned int) time(0));
     K << fx,  0.f, cx,
@@ -33,7 +34,8 @@ bool Semi_Direct::Get_data(SYNC::CALLBACK** _data){
         return true;
     }
     else{
-        ROS_ERROR("[Semi_Direct][Get_data] No Get data!!");
+        ROS_ERROR("[Semi_Direct][Get_data] No Get data!! Curr_C_mat[%d], Curr_D_mat[%d]", 
+        (*_data)->Curr_C_mat.empty(), (*_data)->Curr_D_mat.empty());
         return false;
     }
 }
@@ -45,15 +47,14 @@ inline Eigen::Vector3d Semi_Direct::project2Dto3D(int x, int y, int d, float fx,
     return Eigen::Vector3d (xx, yy, zz);
 }
 
-inline Eigen::Vector2d Semi_Direct::project3Dto2D ( float x, float y, float z, float fx, float fy, float cx, float cy )
-{
+inline Eigen::Vector2d Semi_Direct::project3Dto2D ( float x, float y, float z, float fx, float fy, float cx, float cy ){
     float u = fx*x/z+cx;
     float v = fy*y/z+cy;
     return Eigen::Vector2d ( u,v );
 }
 
 void Semi_Direct::compute_gradient(bool* f_i){
-    if(!(*f_i)){    
+    if(!(*f_i)){
         for(int x=10; x<curr_gray.cols-10; x++)
             for(int y=10; y<curr_gray.rows-10; y++){
                 Eigen::Vector2d delta(
@@ -62,8 +63,9 @@ void Semi_Direct::compute_gradient(bool* f_i){
                 );
                 if(delta.norm() < 50)
                     continue;
-                ushort d = curr_depth.ptr<ushort> (y)[x];
-                if(d==0)
+                ushort d = curr_depth.at<ushort>(y,x);
+                // ushort d = curr_depth.ptr<ushort> (y)[x];
+                if(d==0.0f)
                     continue;
                 Eigen::Vector3d p3d = project2Dto3D(x, y, d, fx, fy, cx, cy, depth_scale);
                 float grayscale = float(curr_gray.ptr<uchar>(y)[x]);
@@ -75,37 +77,44 @@ void Semi_Direct::compute_gradient(bool* f_i){
 }
 
 void Semi_Direct::Display_Feature(){
-    cv::Mat prev_img(prev_color.rows, prev_color.cols, CV_8UC3);
-    cv::Mat curr_img(prev_color.rows, prev_color.cols, CV_8UC3);
+    try{
+        if(prev_color.empty() || curr_color.empty() || curr_depth.empty())    
+            throw;
+        cv::Mat prev_img(prev_color.rows, prev_color.cols, CV_8UC3);
+        cv::Mat curr_img(prev_color.rows, prev_color.cols, CV_8UC3);
 
-    prev_color.copyTo(prev_img);
-    curr_color.copyTo(curr_img);
+        prev_color.copyTo(prev_img);
+        curr_color.copyTo(curr_img);
+        for(Measurement m : measurements){
+            Eigen::Vector3d prev_p = m.pos_world;
+            Eigen::Vector2d pixel_prev = project3Dto2D (prev_p(0,0), prev_p(1,0), prev_p(2,0), fx, fy, cx, cy);
+            Eigen::Vector3d curr_p = Tcw*m.pos_world;
+            Eigen::Vector2d pixel_curr = project3Dto2D (curr_p(0,0), curr_p(1,0), curr_p(2,0), fx, fy, cx, cy);
 
-    for(Measurement m : measurements){
-        Eigen::Vector3d prev_p = m.pos_world;
-        Eigen::Vector2d pixel_prev = project3Dto2D (prev_p(0,0), prev_p(1,0), prev_p(2,0), fx, fy, cx, cy);
-        Eigen::Vector3d curr_p = Tcw*m.pos_world;
-        Eigen::Vector2d pixel_curr = project3Dto2D (curr_p(0,0), curr_p(1,0), curr_p(2,0), fx, fy, cx, cy);
+            uchar b = 0;
+            uchar g = 250;
+            uchar r = 0;
 
-        uchar b = 0;
-        uchar g = 250;
-        uchar r = 0;
+            prev_img.ptr<uchar>(pixel_prev(1,0))[int(pixel_prev(0,0))*3] = b;
+            prev_img.ptr<uchar>(pixel_prev(1,0))[int(pixel_prev(0,0))*3+1] = g;
+            prev_img.ptr<uchar>(pixel_prev(1,0))[int(pixel_prev(0,0))*3+2] = r;
 
-        prev_img.ptr<uchar>(pixel_prev(1,0))[int(pixel_prev(0,0))*3] = b;
-        prev_img.ptr<uchar>(pixel_prev(1,0))[int(pixel_prev(0,0))*3+1] = g;
-        prev_img.ptr<uchar>(pixel_prev(1,0))[int(pixel_prev(0,0))*3+2] = r;
+            curr_color.ptr<uchar>(pixel_curr(1,0))[int(pixel_curr(0,0))*3] = b;
+            curr_color.ptr<uchar>(pixel_curr(1,0))[int(pixel_curr(0,0))*3+1] = g;
+            curr_color.ptr<uchar>(pixel_curr(1,0))[int(pixel_curr(0,0))*3+2] = r;
+                
+            cv::circle (prev_img, cv::Point2d (pixel_prev(0,0), pixel_prev(1,0)), 2, cv::Scalar(b,g,r), 2);
+            cv::circle (curr_color, cv::Point2d (pixel_curr(0,0), pixel_curr(1,0)), 2, cv::Scalar(b,g,r), 2);
+        }
+        cv::imshow ( "prev_img", prev_img );
+        cv::imshow ( "curr_img", curr_color );
+        cv::imshow ( "curr_depth_img", curr_depth );
+        cv::waitKey ( 0 );
 
-        curr_color.ptr<uchar>(pixel_curr(1,0))[int(pixel_curr(0,0))*3] = b;
-        curr_color.ptr<uchar>(pixel_curr(1,0))[int(pixel_curr(0,0))*3+1] = g;
-        curr_color.ptr<uchar>(pixel_curr(1,0))[int(pixel_curr(0,0))*3+2] = r;
-            
-        cv::circle (prev_img, cv::Point2d (pixel_prev(0,0), pixel_prev(1,0)), 4, cv::Scalar(b,g,r), 2);
-        cv::circle (curr_color, cv::Point2d (pixel_curr(0,0), pixel_curr(1,0)), 4, cv::Scalar(b,g,r), 2);
     }
-    cv::imshow ( "prev_img", prev_img );
-    cv::imshow ( "curr_img", curr_color );
-
-    cv::waitKey ( 1 );
+    catch(...){
+        ROS_ERROR("No data Display!");
+    }
 }
 
 bool Semi_Direct::PoseEstimationDirect(){
@@ -138,32 +147,38 @@ bool Semi_Direct::PoseEstimationDirect(){
     }    
     // std::cout << "edges in graph: "<<optimizer.edges().size() << std::endl;
     optimizer.initializeOptimization();
-    optimizer.optimize(100);
+    optimizer.optimize(30);
     Tcw = pose->estimate();
+    // trans = Eigen::Vector4f(Tcw.translation()(0), Tcw.translation()(1), Tcw.translation()(2), 1.0f);
 
-    std::cout << "******************************" << std::endl;
-    std::cout << "[ID:" << id << "] Translation= \n" << Tcw.translation() << std::endl;
-    std::cout << "******************************" << std::endl;
-    std::cout << "[ID:" << id << "] Rotation= \n" << Tcw.rotation() << std::endl;
-    std::cout << "******************************" << std::endl;
-
+    // rotation = Eigen::Quaternionf(Tcw.rotation().cast<float>());
+    // std::cout << "******************************" << std::endl;
+    // std::cout << "[ID:" << id << "] Translation= \n" << trans << std::endl;
+    // std::cout << "******************************" << std::endl;
+    // std::cout << "[ID:" << id << "] Rotation= \n" << Tcw.rotation() << std::endl;
+    // std::cout << "******************************" << std::endl;
+    std::cout << Tcw.translation() << std::endl;
     return true;
 }
 
 void Semi_Direct::runloop(SYNC::CALLBACK** _data){
     ros::Rate loop_rate(10);
+    bool show_flag = (*_data)->show;
     bool first_index = false;
+    
     while(ros::ok()){
+        if(!Get_data(_data)){}
+        else{
+            compute_gradient(&first_index);
+            std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+            PoseEstimationDirect();
+            std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+            std::chrono::duration<double> time_used = std::chrono::duration_cast<std::chrono::duration<double>> (t2-t1);
+            std::cout << "direct method costs time: " << time_used.count() << " seconds." << std::endl;
+            if(show_flag) Display_Feature();
+        }
+
         ros::spinOnce();
         loop_rate.sleep();
-        
-        if(!Get_data(_data)) continue;
-        compute_gradient(&first_index);
-        std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
-        PoseEstimationDirect();
-        std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
-        std::chrono::duration<double> time_used = std::chrono::duration_cast<std::chrono::duration<double>> (t2-t1);
-        std::cout << "direct method costs time: " << time_used.count() << " seconds." << std::endl;
-        Display_Feature();
     }
 }

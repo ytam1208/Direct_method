@@ -9,6 +9,7 @@
 #include <message_filters/sync_policies/approximate_time.h>
 
 #include <iostream>
+#include <exception>
 #include <fstream>
 #include <vector>
 #include <chrono>
@@ -50,6 +51,5 @@ int main(int argc, char** argv)
     }
     Semi_Direct sd(cam_intrinsic, mc);
 
-    ros::spin();
     return 0;
 }

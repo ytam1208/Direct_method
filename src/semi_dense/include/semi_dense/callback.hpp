@@ -9,6 +9,7 @@
 #include <sensor_msgs/image_encodings.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/point_cloud2_iterator.h>
+#include <sensor_msgs/CameraInfo.h>
 #include <image_transport/image_transport.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
@@ -30,22 +31,27 @@ namespace SYNC
     {
         public:
             cv::Mat Curr_D_mat;     //astra_camera/depth/image_raw
-            cv::Mat Curr_Dp_mat;    //astra_camera/depth/points
+            // cv::Mat Curr_Dp_mat;    //astra_camera/depth/points
             cv::Mat Curr_C_mat;     //astra_camera/color/image_raw
+            std::vector<cv::Point3f> Depth_pt_v;
+
         private:
             ros::NodeHandle nh;
             message_filters::Subscriber<sensor_msgs::Image> Color_image_sub;
             message_filters::Subscriber<sensor_msgs::Image> Depth_image_sub;
             message_filters::Subscriber<sensor_msgs::PointCloud2> Depth_point_sub;
+            
             message_filters::Synchronizer<MySyncPolicy> sync;
 
         public:
-            cv_bridge::CvImagePtr Convert_Pcl2_to_XYZ(const sensor_msgs::PointCloud2ConstPtr& Input_img); 
+            void Convert_Pcl2_to_XYZ(const sensor_msgs::PointCloud2ConstPtr& Input_img); 
             cv_bridge::CvImagePtr Convert_Pcl2_to_Image(const sensor_msgs::PointCloud2ConstPtr& Input_img); 
             cv_bridge::CvImagePtr Convert_Image(const sensor_msgs::ImageConstPtr& Input_img); 
             cv_bridge::CvImagePtr Convert_Image(const sensor_msgs::Image& Input_img); 
 
-            void Synchronize(const sensor_msgs::ImageConstPtr& c_image, const sensor_msgs::ImageConstPtr& d_image, const sensor_msgs::PointCloud2ConstPtr& d_points);
+            void Synchronize(const sensor_msgs::ImageConstPtr& c_image, 
+                                const sensor_msgs::ImageConstPtr& d_image, 
+                                    const sensor_msgs::PointCloud2ConstPtr& d_points);
         public:
 
             CALLBACK(ros::NodeHandle* _nh);
