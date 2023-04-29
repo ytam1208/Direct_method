@@ -25,7 +25,8 @@ find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED)
 find_package(Sophus REQUIRED)
-
+find_package(GLEW REQUIRED)
+find_package(Pangolin REQUIRED)
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -133,6 +134,8 @@ include
   ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}
+  ${GLEW_INCLUDE_DIRS}
+  ${Pangolin_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
   ${Sophus_INCLUDE_DIRS}
   ${CSPARSE_INCLUDE_DIRS}
@@ -171,6 +174,7 @@ target_link_libraries(${PROJECT_NAME}_node
   ${OpenCV_LIBRARIES}
   ${Eigen3_LIBRARIES} 
   ${g2o_LIBRARIES}
+  ${Pangolin_LIBRARIES}
 )
 
 #############

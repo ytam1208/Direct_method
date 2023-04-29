@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/cona/Direct/src
+CMAKE_SOURCE_DIR = /home/cona/Direct_method/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/cona/Direct/build
+CMAKE_BINARY_DIR = /home/cona/Direct_method/build
 
 # Utility rule file for actionlib_generate_messages_cpp.
 
@@ -63,10 +63,10 @@ semi_dense/CMakeFiles/actionlib_generate_messages_cpp.dir/build: actionlib_gener
 .PHONY : semi_dense/CMakeFiles/actionlib_generate_messages_cpp.dir/build
 
 semi_dense/CMakeFiles/actionlib_generate_messages_cpp.dir/clean:
-	cd /home/cona/Direct/build/semi_dense && $(CMAKE_COMMAND) -P CMakeFiles/actionlib_generate_messages_cpp.dir/cmake_clean.cmake
+	cd /home/cona/Direct_method/build/semi_dense && $(CMAKE_COMMAND) -P CMakeFiles/actionlib_generate_messages_cpp.dir/cmake_clean.cmake
 .PHONY : semi_dense/CMakeFiles/actionlib_generate_messages_cpp.dir/clean
 
 semi_dense/CMakeFiles/actionlib_generate_messages_cpp.dir/depend:
-	cd /home/cona/Direct/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/cona/Direct/src /home/cona/Direct/src/semi_dense /home/cona/Direct/build /home/cona/Direct/build/semi_dense /home/cona/Direct/build/semi_dense/CMakeFiles/actionlib_generate_messages_cpp.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/cona/Direct_method/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/cona/Direct_method/src /home/cona/Direct_method/src/semi_dense /home/cona/Direct_method/build /home/cona/Direct_method/build/semi_dense /home/cona/Direct_method/build/semi_dense/CMakeFiles/actionlib_generate_messages_cpp.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : semi_dense/CMakeFiles/actionlib_generate_messages_cpp.dir/depend
 

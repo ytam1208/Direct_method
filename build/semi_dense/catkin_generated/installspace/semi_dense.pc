@@ -1,4 +1,4 @@
-prefix=/home/cona/Direct/install
+prefix=/home/cona/Direct_method/install
 
 Name: semi_dense
 Description: Description of semi_dense

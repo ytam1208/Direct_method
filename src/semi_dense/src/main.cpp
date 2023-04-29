@@ -32,9 +32,12 @@
 #include "semi_dense/callback.hpp"
 #include "semi_dense/EdgeSE3ProjectDirect.hpp"
 #include "semi_dense/semi_dense.hpp"
+#include "semi_dense/plotTrajectory.hpp"
 
+#define For_Mac
 int main(int argc, char** argv)
 {
+#ifdef For_Window   
     ros::init(argc, argv, "semi_dense_node");
 	ros::NodeHandle nh("~");
     SYNC::CALLBACK* mc = new SYNC::CALLBACK(&nh);
@@ -50,6 +53,8 @@ int main(int argc, char** argv)
         cam_intrinsic.push_back(test);
     }
     Semi_Direct sd(cam_intrinsic, mc);
-
+#endif
+    std::string path = "/home/cona/github/algorithm_ws/ROS_build/trajectory.txt";
+    Loader ld(path);
     return 0;
 }

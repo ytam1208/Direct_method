@@ -1,8 +1,8 @@
-# Install script for directory: /home/cona/Direct/src
+# Install script for directory: /home/cona/Direct_method/src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/cona/Direct/install")
+  set(CMAKE_INSTALL_PREFIX "/home/cona/Direct_method/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -49,89 +49,89 @@ endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "/home/cona/Direct/install/_setup_util.py")
+   "/home/cona/Direct_method/install/_setup_util.py")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/home/cona/Direct/install" TYPE PROGRAM FILES "/home/cona/Direct/build/catkin_generated/installspace/_setup_util.py")
+file(INSTALL DESTINATION "/home/cona/Direct_method/install" TYPE PROGRAM FILES "/home/cona/Direct_method/build/catkin_generated/installspace/_setup_util.py")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "/home/cona/Direct/install/env.sh")
+   "/home/cona/Direct_method/install/env.sh")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/home/cona/Direct/install" TYPE PROGRAM FILES "/home/cona/Direct/build/catkin_generated/installspace/env.sh")
+file(INSTALL DESTINATION "/home/cona/Direct_method/install" TYPE PROGRAM FILES "/home/cona/Direct_method/build/catkin_generated/installspace/env.sh")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "/home/cona/Direct/install/setup.bash;/home/cona/Direct/install/local_setup.bash")
+   "/home/cona/Direct_method/install/setup.bash;/home/cona/Direct_method/install/local_setup.bash")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/home/cona/Direct/install" TYPE FILE FILES
-    "/home/cona/Direct/build/catkin_generated/installspace/setup.bash"
-    "/home/cona/Direct/build/catkin_generated/installspace/local_setup.bash"
+file(INSTALL DESTINATION "/home/cona/Direct_method/install" TYPE FILE FILES
+    "/home/cona/Direct_method/build/catkin_generated/installspace/setup.bash"
+    "/home/cona/Direct_method/build/catkin_generated/installspace/local_setup.bash"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "/home/cona/Direct/install/setup.sh;/home/cona/Direct/install/local_setup.sh")
+   "/home/cona/Direct_method/install/setup.sh;/home/cona/Direct_method/install/local_setup.sh")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/home/cona/Direct/install" TYPE FILE FILES
-    "/home/cona/Direct/build/catkin_generated/installspace/setup.sh"
-    "/home/cona/Direct/build/catkin_generated/installspace/local_setup.sh"
+file(INSTALL DESTINATION "/home/cona/Direct_method/install" TYPE FILE FILES
+    "/home/cona/Direct_method/build/catkin_generated/installspace/setup.sh"
+    "/home/cona/Direct_method/build/catkin_generated/installspace/local_setup.sh"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "/home/cona/Direct/install/setup.zsh;/home/cona/Direct/install/local_setup.zsh")
+   "/home/cona/Direct_method/install/setup.zsh;/home/cona/Direct_method/install/local_setup.zsh")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/home/cona/Direct/install" TYPE FILE FILES
-    "/home/cona/Direct/build/catkin_generated/installspace/setup.zsh"
-    "/home/cona/Direct/build/catkin_generated/installspace/local_setup.zsh"
+file(INSTALL DESTINATION "/home/cona/Direct_method/install" TYPE FILE FILES
+    "/home/cona/Direct_method/build/catkin_generated/installspace/setup.zsh"
+    "/home/cona/Direct_method/build/catkin_generated/installspace/local_setup.zsh"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "/home/cona/Direct/install/.rosinstall")
+   "/home/cona/Direct_method/install/.rosinstall")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/home/cona/Direct/install" TYPE FILE FILES "/home/cona/Direct/build/catkin_generated/installspace/.rosinstall")
+file(INSTALL DESTINATION "/home/cona/Direct_method/install" TYPE FILE FILES "/home/cona/Direct_method/build/catkin_generated/installspace/.rosinstall")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/cona/Direct/build/gtest/cmake_install.cmake")
-  include("/home/cona/Direct/build/semi_dense/cmake_install.cmake")
+  include("/home/cona/Direct_method/build/gtest/cmake_install.cmake")
+  include("/home/cona/Direct_method/build/semi_dense/cmake_install.cmake")
 
 endif()
 
@@ -143,5 +143,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/cona/Direct/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/cona/Direct_method/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

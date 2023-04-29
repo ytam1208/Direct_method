@@ -1,2 +1,2 @@
 semi_dense
--DCATKIN_DEVEL_PREFIX=/home/cona/Direct/devel -DCMAKE_INSTALL_PREFIX=/home/cona/Direct/install -G Unix Makefiles
+-DCATKIN_DEVEL_PREFIX=/home/cona/Direct_method/devel -DCMAKE_INSTALL_PREFIX=/home/cona/Direct_method/install -G Unix Makefiles

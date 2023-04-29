@@ -1,8 +1,8 @@
-# Install script for directory: /home/cona/Direct/src/semi_dense
+# Install script for directory: /home/cona/Direct_method/src/semi_dense
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/cona/Direct/install")
+  set(CMAKE_INSTALL_PREFIX "/home/cona/Direct_method/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -38,17 +38,17 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/cona/Direct/build/semi_dense/catkin_generated/installspace/semi_dense.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/cona/Direct_method/build/semi_dense/catkin_generated/installspace/semi_dense.pc")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/semi_dense/cmake" TYPE FILE FILES
-    "/home/cona/Direct/build/semi_dense/catkin_generated/installspace/semi_denseConfig.cmake"
-    "/home/cona/Direct/build/semi_dense/catkin_generated/installspace/semi_denseConfig-version.cmake"
+    "/home/cona/Direct_method/build/semi_dense/catkin_generated/installspace/semi_denseConfig.cmake"
+    "/home/cona/Direct_method/build/semi_dense/catkin_generated/installspace/semi_denseConfig-version.cmake"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/semi_dense" TYPE FILE FILES "/home/cona/Direct/src/semi_dense/package.xml")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/semi_dense" TYPE FILE FILES "/home/cona/Direct_method/src/semi_dense/package.xml")
 endif()
 

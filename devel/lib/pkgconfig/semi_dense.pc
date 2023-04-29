@@ -1,8 +1,8 @@
-prefix=/home/cona/Direct/devel
+prefix=/home/cona/Direct_method/devel
 
 Name: semi_dense
 Description: Description of semi_dense
 Version: 0.0.0
-Cflags: -I/home/cona/Direct/src/semi_dense/include
+Cflags: -I/home/cona/Direct_method/src/semi_dense/include
 Libs: -L${prefix}/lib 
 Requires: cv_bridge roscpp sensor_msgs std_msgs tf tf2 tf_conversions pcl_ros
