@@ -41,7 +41,6 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "semi_dense_node");
 	ros::NodeHandle nh("~");
     SYNC::CALLBACK* mc = new SYNC::CALLBACK(&nh);
-    CAMERA_INTRINSIC_PARAM* CIP = new CAMERA_INTRINSIC_PARAM;
     XmlRpc::XmlRpcValue* camera_intrinsic = new XmlRpc::XmlRpcValue;
 
     nh.getParam("/Set_Display", mc->show);
@@ -54,7 +53,9 @@ int main(int argc, char** argv)
     }
     Semi_Direct sd(cam_intrinsic, mc);
 #endif
-    std::string path = "/home/cona/github/algorithm_ws/ROS_build/trajectory.txt";
-    Loader ld(path);
+
+    std::string path = "/home/cona/Direct_method/data/freiburg1_xyz.txt";
+    CAMERA_INTRINSIC_PARAM* CIP = new CAMERA_INTRINSIC_PARAM(319.5, 239.5, 525.0, 525.0, 1000.0);
+    Loader ld(path, CIP);
     return 0;
 }

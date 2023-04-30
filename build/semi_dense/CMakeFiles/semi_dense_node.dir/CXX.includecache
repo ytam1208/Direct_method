@@ -73,6 +73,8 @@ semi_dense/param.hpp
 /home/cona/Direct_method/src/semi_dense/include/semi_dense/plotTrajectory.hpp
 pangolin/pangolin.h
 -
+pangolin/display/default_font.h
+-
 Eigen/Core
 -
 unistd.h
