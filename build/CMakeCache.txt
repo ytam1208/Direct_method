@@ -392,7 +392,7 @@ PYTHON_VERSION:STRING=3
 PY_EM:STRING=/usr/lib/python3/dist-packages/em.py
 
 //The directory containing a CMake configuration file for Pangolin.
-Pangolin_DIR:PATH=/usr/local/lib/cmake/Pangolin
+Pangolin_DIR:PATH=/home/cona/github/Pangolin/build
 
 //Value Computed by CMake
 Project_BINARY_DIR:STATIC=/home/cona/Direct_method/build

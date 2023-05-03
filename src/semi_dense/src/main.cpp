@@ -33,8 +33,8 @@
 #include "semi_dense/EdgeSE3ProjectDirect.hpp"
 #include "semi_dense/semi_dense.hpp"
 #include "semi_dense/plotTrajectory.hpp"
+#include "semi_dense/extern.hpp"
 
-#define For_Mac
 int main(int argc, char** argv)
 {
 #ifdef For_Window   
@@ -53,9 +53,10 @@ int main(int argc, char** argv)
     }
     Semi_Direct sd(cam_intrinsic, mc);
 #endif
-
+#ifdef For_MAC  
     std::string path = "/home/cona/Direct_method/data/freiburg1_xyz.txt";
     CAMERA_INTRINSIC_PARAM* CIP = new CAMERA_INTRINSIC_PARAM(319.5, 239.5, 525.0, 525.0, 1000.0);
     Loader ld(path, CIP);
     return 0;
+#endif  
 }

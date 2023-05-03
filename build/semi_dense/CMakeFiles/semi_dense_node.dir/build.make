@@ -321,11 +321,11 @@ semi_dense_node_EXTERNAL_OBJECTS =
 /home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/lib/x86_64-linux-gnu/libopencv_viz.so.4.2.0
 /home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/lib/x86_64-linux-gnu/libopencv_xobjdetect.so.4.2.0
 /home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/lib/x86_64-linux-gnu/libopencv_xphoto.so.4.2.0
-/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/local/lib/libpango_glgeometry.so
-/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/local/lib/libpango_python.so
-/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/local/lib/libpango_scene.so
-/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/local/lib/libpango_tools.so
-/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/local/lib/libpango_video.so
+/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /home/cona/github/Pangolin/build/libpango_glgeometry.so
+/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /home/cona/github/Pangolin/build/libpango_python.so
+/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /home/cona/github/Pangolin/build/libpango_scene.so
+/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /home/cona/github/Pangolin/build/libpango_tools.so
+/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /home/cona/github/Pangolin/build/libpango_video.so
 /home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/lib/x86_64-linux-gnu/libopencv_highgui.so.4.2.0
 /home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/lib/x86_64-linux-gnu/libopencv_datasets.so.4.2.0
 /home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/lib/x86_64-linux-gnu/libopencv_plot.so.4.2.0
@@ -345,20 +345,20 @@ semi_dense_node_EXTERNAL_OBJECTS =
 /home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/lib/x86_64-linux-gnu/libopencv_photo.so.4.2.0
 /home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/lib/x86_64-linux-gnu/libopencv_imgproc.so.4.2.0
 /home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/lib/x86_64-linux-gnu/libopencv_core.so.4.2.0
-/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/local/lib/libpango_geometry.so
-/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/local/lib/libtinyobj.so
-/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/local/lib/libpango_plot.so
-/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/local/lib/libpango_display.so
-/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/local/lib/libpango_vars.so
-/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/local/lib/libpango_windowing.so
-/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/local/lib/libpango_opengl.so
+/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /home/cona/github/Pangolin/build/libpango_geometry.so
+/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /home/cona/github/Pangolin/build/libtinyobj.so
+/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /home/cona/github/Pangolin/build/libpango_plot.so
+/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /home/cona/github/Pangolin/build/libpango_display.so
+/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /home/cona/github/Pangolin/build/libpango_vars.so
+/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /home/cona/github/Pangolin/build/libpango_windowing.so
+/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /home/cona/github/Pangolin/build/libpango_opengl.so
 /home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/lib/x86_64-linux-gnu/libGLEW.so
 /home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/lib/x86_64-linux-gnu/libOpenGL.so
 /home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/lib/x86_64-linux-gnu/libGLX.so
 /home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/lib/x86_64-linux-gnu/libGLU.so
-/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/local/lib/libpango_image.so
-/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/local/lib/libpango_packetstream.so
-/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /usr/local/lib/libpango_core.so
+/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /home/cona/github/Pangolin/build/libpango_image.so
+/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /home/cona/github/Pangolin/build/libpango_packetstream.so
+/home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: /home/cona/github/Pangolin/build/libpango_core.so
 /home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node: semi_dense/CMakeFiles/semi_dense_node.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/cona/Direct_method/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable /home/cona/Direct_method/devel/lib/semi_dense/semi_dense_node"
 	cd /home/cona/Direct_method/build/semi_dense && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/semi_dense_node.dir/link.txt --verbose=$(VERBOSE)

@@ -118,23 +118,22 @@ void Semi_Direct::Display_Feature(){
 }
 
 bool Semi_Direct::PoseEstimationDirect(){
-    typedef g2o::BlockSolver<g2o::BlockSolverTraits<6,1>> DirectBlock;  // 求解的向量是6＊1的
-    DirectBlock::LinearSolverType* linearSolver = new g2o::LinearSolverDense< DirectBlock::PoseMatrixType > ();
-    DirectBlock* solver_ptr = new DirectBlock ( linearSolver );
+    typedef g2o::BlockSolver<g2o::BlockSolverTraits<6,1>> DirectBlock;  
+    DirectBlock::LinearSolverType* linearSolver = new g2o::LinearSolverDense<DirectBlock::PoseMatrixType>();
+    DirectBlock* solver_ptr = new DirectBlock (linearSolver);
     // g2o::OptimizationAlgorithmGaussNewton* solver = new g2o::OptimizationAlgorithmGaussNewton( std::move(solver_ptr) ); // G-N
     g2o::OptimizationAlgorithmLevenberg* solver = new g2o::OptimizationAlgorithmLevenberg ( std::move(solver_ptr)); // L-M
 
     g2o::SparseOptimizer optimizer;
-    optimizer.setAlgorithm ( solver );
-    optimizer.setVerbose( true );
+    optimizer.setAlgorithm(solver);
+    optimizer.setVerbose(true);
 
     g2o::VertexSE3Expmap* pose = new g2o::VertexSE3Expmap();
-    pose->setEstimate ( g2o::SE3Quat ( Tcw.rotation(), Tcw.translation() ) );
-    pose->setId (0);
-    optimizer.addVertex ( pose );
+    pose->setEstimate (g2o::SE3Quat(Tcw.rotation(), Tcw.translation()));
+    pose->setId(0);
+    optimizer.addVertex(pose);
 
-    for (Measurement m: measurements)
-    {
+    for (Measurement m: measurements){
         EdgeSE3ProjectDirect* edge = new EdgeSE3ProjectDirect(
             m.pos_world,
             K( 0,0 ), K( 1,1 ), K( 0,2 ), K( 1,2 ), &curr_gray
@@ -151,34 +150,33 @@ bool Semi_Direct::PoseEstimationDirect(){
     Tcw = pose->estimate();
     // trans = Eigen::Vector4f(Tcw.translation()(0), Tcw.translation()(1), Tcw.translation()(2), 1.0f);
 
-    // rotation = Eigen::Quaternionf(Tcw.rotation().cast<float>());
-    // std::cout << "******************************" << std::endl;
-    // std::cout << "[ID:" << id << "] Translation= \n" << trans << std::endl;
-    // std::cout << "******************************" << std::endl;
-    // std::cout << "[ID:" << id << "] Rotation= \n" << Tcw.rotation() << std::endl;
-    // std::cout << "******************************" << std::endl;
-    std::cout << Tcw.translation() << std::endl;
+    rotation = Eigen::Quaternionf(Tcw.rotation().cast<float>());
+    std::cout << "******************************" << std::endl;
+    std::cout << "[ID:" << id << "] Translation= \n" << trans << std::endl;
+    std::cout << "******************************" << std::endl;
+    std::cout << "[ID:" << id << "] Rotation= \n" << Tcw.rotation() << std::endl;
+    std::cout << "******************************" << std::endl;
     return true;
 }
 
 void Semi_Direct::runloop(SYNC::CALLBACK** _data){
-    ros::Rate loop_rate(10);
-    bool show_flag = (*_data)->show;
-    bool first_index = false;
+        ros::Rate loop_rate(10);
+        bool show_flag = (*_data)->show;
+        bool first_index = false;
     
-    while(ros::ok()){
-        if(!Get_data(_data)){}
-        else{
-            compute_gradient(&first_index);
-            std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
-            PoseEstimationDirect();
-            std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
-            std::chrono::duration<double> time_used = std::chrono::duration_cast<std::chrono::duration<double>> (t2-t1);
-            std::cout << "direct method costs time: " << time_used.count() << " seconds." << std::endl;
-            if(show_flag) Display_Feature();
-        }
-
-        ros::spinOnce();
-        loop_rate.sleep();
-    }
+        while(ros::ok()){
+            if(!Get_data(_data)){}
+            else{
+                compute_gradient(&first_index);
+                std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+                PoseEstimationDirect();
+                std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+                std::chrono::duration<double> time_used = std::chrono::duration_cast<std::chrono::duration<double>> (t2-t1);
+                std::cout << "direct method costs time: " << time_used.count() << " seconds." << std::endl;
+                if(show_flag) Display_Feature();
+            }
+            ros::spinOnce();
+            loop_rate.sleep();
+	    } 
 }
+

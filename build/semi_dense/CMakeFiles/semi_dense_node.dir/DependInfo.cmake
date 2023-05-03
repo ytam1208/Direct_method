@@ -34,6 +34,22 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "/home/cona/Direct_method/src/semi_dense/include/semi_dense"
   "/usr/include/opencv4"
   "/usr/include/eigen3"
+  "/home/cona/github/Pangolin/components/pango_core/include"
+  "/home/cona/github/Pangolin/components/pango_display/include"
+  "/home/cona/github/Pangolin/components/pango_opengl/include"
+  "/home/cona/github/Pangolin/components/pango_image/include"
+  "/home/cona/github/Pangolin/components/pango_windowing/include"
+  "/home/cona/github/Pangolin/build/include"
+  "/home/cona/github/Pangolin/components/pango_vars/include"
+  "/home/cona/github/Pangolin/components/pango_geometry/include"
+  "/home/cona/github/Pangolin/components/tinyobj/include"
+  "/home/cona/github/Pangolin/components/pango_glgeometry/include"
+  "/home/cona/github/Pangolin/components/pango_packetstream/include"
+  "/home/cona/github/Pangolin/components/pango_plot/include"
+  "/home/cona/github/Pangolin/components/pango_python/include"
+  "/home/cona/github/Pangolin/components/pango_video/include"
+  "/home/cona/github/Pangolin/components/pango_scene/include"
+  "/home/cona/github/Pangolin/components/pango_tools/include"
   )
 
 # Targets to which this target links.
