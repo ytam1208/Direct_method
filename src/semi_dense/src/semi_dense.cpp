@@ -1,6 +1,6 @@
 #include "semi_dense/semi_dense.hpp"
 
-Semi_Direct::Semi_Direct(std::vector<double>& cam_intrinsic, SYNC::CALLBACK* data):id(1){
+Semi_Direct::Semi_Direct(std::vector<double>& cam_intrinsic, SYNC::CALLBACK* data):id(1),loop_rate(30){
     initalize(cam_intrinsic);
     runloop(&data);
 }
@@ -160,23 +160,22 @@ bool Semi_Direct::PoseEstimationDirect(){
 }
 
 void Semi_Direct::runloop(SYNC::CALLBACK** _data){
-        ros::Rate loop_rate(10);
-        bool show_flag = (*_data)->show;
-        bool first_index = false;
-    
-        while(ros::ok()){
-            if(!Get_data(_data)){}
-            else{
-                compute_gradient(&first_index);
-                std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
-                PoseEstimationDirect();
-                std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
-                std::chrono::duration<double> time_used = std::chrono::duration_cast<std::chrono::duration<double>> (t2-t1);
-                std::cout << "direct method costs time: " << time_used.count() << " seconds." << std::endl;
-                if(show_flag) Display_Feature();
-            }
-            ros::spinOnce();
-            loop_rate.sleep();
-	    } 
+
+    bool show_flag = (*_data)->show;
+    bool first_index = false;
+	while(ros::ok()){
+        if(!Get_data(_data)){}
+        else{
+            compute_gradient(&first_index);
+            std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+            PoseEstimationDirect();
+            std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+            std::chrono::duration<double> time_used = std::chrono::duration_cast<std::chrono::duration<double>> (t2-t1);
+            std::cout << "direct method costs time: " << time_used.count() << " seconds." << std::endl;
+            if(show_flag) Display_Feature();
+        }
+        ros::spinOnce();
+        loop_rate.sleep();
+	}  
 }
 

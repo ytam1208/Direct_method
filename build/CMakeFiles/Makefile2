@@ -556,12 +556,12 @@ semi_dense/CMakeFiles/semi_dense_node.dir/all: semi_dense/CMakeFiles/std_srvs_ge
 semi_dense/CMakeFiles/semi_dense_node.dir/all: semi_dense/CMakeFiles/nodelet_generate_messages_py.dir/all
 	$(MAKE) -f semi_dense/CMakeFiles/semi_dense_node.dir/build.make semi_dense/CMakeFiles/semi_dense_node.dir/depend
 	$(MAKE) -f semi_dense/CMakeFiles/semi_dense_node.dir/build.make semi_dense/CMakeFiles/semi_dense_node.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/cona/Direct_method/build/CMakeFiles --progress-num=9,10,11,12,13 "Built target semi_dense_node"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/cona/Direct_method/build/CMakeFiles --progress-num=9,10,11,12,13,14 "Built target semi_dense_node"
 .PHONY : semi_dense/CMakeFiles/semi_dense_node.dir/all
 
 # Build rule for subdir invocation for target.
 semi_dense/CMakeFiles/semi_dense_node.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/cona/Direct_method/build/CMakeFiles 5
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/cona/Direct_method/build/CMakeFiles 6
 	$(MAKE) -f CMakeFiles/Makefile2 semi_dense/CMakeFiles/semi_dense_node.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/cona/Direct_method/build/CMakeFiles 0
 .PHONY : semi_dense/CMakeFiles/semi_dense_node.dir/rule

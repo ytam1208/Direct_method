@@ -12,6 +12,7 @@ struct Measurement
 class Semi_Direct: public CAMERA_INTRINSIC_PARAM
 {
     private:
+        ros::Rate loop_rate;
         int id;
         cv::Mat curr_color, curr_depth, curr_gray;
         cv::Mat prev_color;
@@ -20,7 +21,6 @@ class Semi_Direct: public CAMERA_INTRINSIC_PARAM
         Eigen::Quaternionf rotation;
         Eigen::Isometry3d Tcw;  //Camera Pose(RT)
         std::vector<Measurement> measurements;
-        std::vector<std::thread> thread_list;
     private:
         EdgeSE3ProjectDirect ES3;
         std::mutex data_mtx;
@@ -37,10 +37,7 @@ class Semi_Direct: public CAMERA_INTRINSIC_PARAM
 
     public:
         Semi_Direct(std::vector<double>& cam_intrinsic, SYNC::CALLBACK* data);
-        ~Semi_Direct(){
-            for (int i = 0; i < (int)thread_list.size(); i++)
-                thread_list[i].join();
-        };
+        ~Semi_Direct(){};
 };
 
 

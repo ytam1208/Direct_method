@@ -4,6 +4,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/semi_dense_node.dir/src/EdgeSE3ProjectDirect.cpp.o"
   "CMakeFiles/semi_dense_node.dir/src/callback.cpp.o"
   "CMakeFiles/semi_dense_node.dir/src/main.cpp.o"
+  "CMakeFiles/semi_dense_node.dir/src/plotTrajectory.cpp.o"
   "CMakeFiles/semi_dense_node.dir/src/semi_dense.cpp.o"
 )
 

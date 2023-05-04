@@ -163,6 +163,7 @@ set( g2o_LIBRARIES
 add_executable(${PROJECT_NAME}_node 
 src/callback.cpp
 src/EdgeSE3ProjectDirect.cpp
+src/plotTrajectory.cpp
 src/semi_dense.cpp
 src/main.cpp
 )

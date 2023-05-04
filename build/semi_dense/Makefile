@@ -1433,6 +1433,33 @@ src/main.cpp.s:
 	cd /home/cona/Direct_method/build && $(MAKE) -f semi_dense/CMakeFiles/semi_dense_node.dir/build.make semi_dense/CMakeFiles/semi_dense_node.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/plotTrajectory.o: src/plotTrajectory.cpp.o
+
+.PHONY : src/plotTrajectory.o
+
+# target to build an object file
+src/plotTrajectory.cpp.o:
+	cd /home/cona/Direct_method/build && $(MAKE) -f semi_dense/CMakeFiles/semi_dense_node.dir/build.make semi_dense/CMakeFiles/semi_dense_node.dir/src/plotTrajectory.cpp.o
+.PHONY : src/plotTrajectory.cpp.o
+
+src/plotTrajectory.i: src/plotTrajectory.cpp.i
+
+.PHONY : src/plotTrajectory.i
+
+# target to preprocess a source file
+src/plotTrajectory.cpp.i:
+	cd /home/cona/Direct_method/build && $(MAKE) -f semi_dense/CMakeFiles/semi_dense_node.dir/build.make semi_dense/CMakeFiles/semi_dense_node.dir/src/plotTrajectory.cpp.i
+.PHONY : src/plotTrajectory.cpp.i
+
+src/plotTrajectory.s: src/plotTrajectory.cpp.s
+
+.PHONY : src/plotTrajectory.s
+
+# target to generate assembly for a file
+src/plotTrajectory.cpp.s:
+	cd /home/cona/Direct_method/build && $(MAKE) -f semi_dense/CMakeFiles/semi_dense_node.dir/build.make semi_dense/CMakeFiles/semi_dense_node.dir/src/plotTrajectory.cpp.s
+.PHONY : src/plotTrajectory.cpp.s
+
 src/semi_dense.o: src/semi_dense.cpp.o
 
 .PHONY : src/semi_dense.o
@@ -1561,6 +1588,9 @@ help:
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/plotTrajectory.o"
+	@echo "... src/plotTrajectory.i"
+	@echo "... src/plotTrajectory.s"
 	@echo "... src/semi_dense.o"
 	@echo "... src/semi_dense.i"
 	@echo "... src/semi_dense.s"
