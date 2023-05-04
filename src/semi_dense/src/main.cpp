@@ -40,9 +40,10 @@ int main(int argc, char** argv)
 #ifdef For_Window   
     ros::init(argc, argv, "semi_dense_node");
 	ros::NodeHandle nh("~");
-    SYNC::CALLBACK* mc = new SYNC::CALLBACK(&nh);
-    XmlRpc::XmlRpcValue* camera_intrinsic = new XmlRpc::XmlRpcValue;
+    // SYNC::CALLBACK* mc = new SYNC::CALLBACK(&nh);
+    std::unique_ptr<SYNC::CALLBACK> mc = std::make_unique<SYNC::CALLBACK>(&nh);
 
+    XmlRpc::XmlRpcValue* camera_intrinsic = new XmlRpc::XmlRpcValue;
     nh.getParam("/Set_Display", mc->show);
     nh.getParam("/CAMERA_INTRINSIC_PARAM", *camera_intrinsic);
 
@@ -51,7 +52,9 @@ int main(int argc, char** argv)
         double test = (double)camera_intrinsic[0][i];
         cam_intrinsic.push_back(test);
     }
+    // Semi_Direct sd(cam_intrinsic, mc);
     Semi_Direct sd(cam_intrinsic, mc);
+    
 #endif
 #ifdef For_MAC  
     std::string path = "/home/cona/Direct_method/data/freiburg1_xyz.txt";
