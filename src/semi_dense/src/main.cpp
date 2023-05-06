@@ -36,7 +36,7 @@
 #include "semi_dense/semi_dense.hpp"
 #include "semi_dense/plotTrajectory.hpp"
 
-// #define __FULL_RESOURCE__
+// #define __ROS__
 int main(int argc, char** argv)
 {
 #ifdef __ROS__   
