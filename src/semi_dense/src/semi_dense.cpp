@@ -1,6 +1,6 @@
 #include "semi_dense/semi_dense.hpp"
 
-#ifdef For_Multi_thread  
+#ifdef __ROS__
 Semi_Direct::Semi_Direct(std::vector<double>& cam_intrinsic, std::unique_ptr<SYNC::CALLBACK>& data):id(1){
     initalize(cam_intrinsic);
     runloop(data);
@@ -56,19 +56,17 @@ void Semi_Direct::runloop(std::unique_ptr<SYNC::CALLBACK>& _data){
     Direct_Method.join();
     // Visualize.join();
 }
-#endif
-
-#ifndef For_Multi_thread
-Semi_Direct::Semi_Direct(std::vector<double>& cam_intrinsic, SYNC::CALLBACK* data):id(1),loop_rate(30){
+#else
+Semi_Direct::Semi_Direct(std::vector<double>& cam_intrinsic, std::unique_ptr<DBLoader>& data):id(1){
     initalize(cam_intrinsic);
-    runloop(&data);
+    // runloop(data);
 }
 
-bool Semi_Direct::Get_data(SYNC::CALLBACK** _data){
-    if(!(*_data)->Curr_C_mat.empty() && !(*_data)->Curr_D_mat.empty()){
+bool Semi_Direct::Get_data(DF* _data){
+    if(!(_data)->color.empty() && !(_data)->depth.empty()){
         data_mtx.lock();
-        curr_color = (*_data)->Curr_C_mat.clone();
-        curr_depth = (*_data)->Curr_D_mat.clone();
+        curr_color = (_data)->color.clone();
+        curr_depth = (_data)->depth.clone();
         cv::cvtColor(curr_color, curr_gray, cv::COLOR_BGR2GRAY);
         // measurements.clear();
         data_mtx.unlock();
@@ -76,16 +74,17 @@ bool Semi_Direct::Get_data(SYNC::CALLBACK** _data){
     }
     else{
         ROS_ERROR("[Semi_Direct][Get_data] No Get data!! Curr_C_mat[%d], Curr_D_mat[%d]", 
-        (*_data)->Curr_C_mat.empty(), (*_data)->Curr_D_mat.empty());
+        (_data)->color.empty(), (_data)->depth.empty());
         return false;
     }
 }
 
-void Semi_Direct::runloop(SYNC::CALLBACK** _data){
-    bool show_flag = (*_data)->show;
+void Semi_Direct::runloop(std::unique_ptr<DBLoader>& _data){
+    bool show_flag = (_data)->show;
     bool first_index = false;
-	while(ros::ok()){
-        if(!Get_data((_data))){}
+    DBLoader* DB = _data.get();
+    for(auto frame : DB->frames){
+        if(!Get_data(&frame)){}
         else{
             compute_gradient(&first_index);
             std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
@@ -93,14 +92,11 @@ void Semi_Direct::runloop(SYNC::CALLBACK** _data){
             std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
             std::chrono::duration<double> time_used = std::chrono::duration_cast<std::chrono::duration<double>> (t2-t1);
             std::cout << "direct method costs time: " << time_used.count() << " seconds." << std::endl;
-            if(show_flag) Display_Feature();
+            // if(show_flag) Display_Feature();
         }
-        ros::spinOnce();
-        loop_rate.sleep();
-	} 
+    }
 }
 #endif
-
 void Semi_Direct::initalize(std::vector<double>& c_i){
     cx = c_i[0];
     cy = c_i[1];
@@ -118,8 +114,6 @@ void Semi_Direct::initalize(std::vector<double>& c_i){
 
     Tcw = Eigen::Isometry3d::Identity();
 }
-
-
 
 inline Eigen::Vector3d Semi_Direct::project2Dto3D(int x, int y, int d, float fx, float fy, float cx, float cy, float scale){
     float zz = float(d) / scale;
@@ -227,13 +221,13 @@ bool Semi_Direct::PoseEstimationDirect(){
     }    
     // std::cout << "edges in graph: "<<optimizer.edges().size() << std::endl;
     optimizer.initializeOptimization();
-    optimizer.optimize(30);
+    optimizer.optimize(100);
     Tcw = pose->estimate();
+    poses.push_back(Tcw);
     // trans = Eigen::Vector4f(Tcw.translation()(0), Tcw.translation()(1), Tcw.translation()(2), 1.0f);
 
-    rotation = Eigen::Quaternionf(Tcw.rotation().cast<float>());
     std::cout << "******************************" << std::endl;
-    std::cout << "[ID:" << id << "] Translation= \n" << trans << std::endl;
+    std::cout << "[ID:" << id << "] Translation= \n" << Tcw.translation() << std::endl;
     std::cout << "******************************" << std::endl;
     std::cout << "[ID:" << id << "] Rotation= \n" << Tcw.rotation() << std::endl;
     std::cout << "******************************" << std::endl;

@@ -31,7 +31,7 @@ namespace SYNC
     {
         public:
             cv::Mat Curr_D_mat;     //astra_camera/depth/image_raw
-            // cv::Mat Curr_Dp_mat;    //astra_camera/depth/points
+            cv::Mat Curr_Dp_mat;    //astra_camera/depth/points
             cv::Mat Curr_C_mat;     //astra_camera/color/image_raw
             std::vector<cv::Point3f> Depth_pt_v;
 

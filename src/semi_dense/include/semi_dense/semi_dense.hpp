@@ -1,7 +1,8 @@
 #include "semi_dense/param.hpp"
 #include "semi_dense/EdgeSE3ProjectDirect.hpp"
 #include "semi_dense/callback.hpp"
-#include "semi_dense/extern.hpp"
+#include "semi_dense/Loader.hpp"
+#include "semi_dense/plotTrajectory.hpp"
 
 struct Measurement
 {
@@ -22,6 +23,8 @@ class Semi_Direct: public CAMERA_INTRINSIC_PARAM
         Eigen::Isometry3d Tcw;  //Camera Pose(RT)
         std::vector<Measurement> measurements;
         std::vector<std::thread> thread_list;
+    public:
+        std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>> poses;
     private:
         EdgeSE3ProjectDirect ES3;
         std::mutex data_mtx;
@@ -34,15 +37,14 @@ class Semi_Direct: public CAMERA_INTRINSIC_PARAM
         bool PoseEstimationDirect();
 
     public:
-#ifndef For_Multi_thread 
-        bool Get_data(SYNC::CALLBACK** _data);
-        void runloop(SYNC::CALLBACK** _data);
-        Semi_Direct(std::vector<double>& cam_intrinsic, SYNC::CALLBACK* data);
-#endif
-#ifdef For_Multi_thread
+#ifdef __ROS__
         bool Get_data(SYNC::CALLBACK* _data);
         void runloop(std::unique_ptr<SYNC::CALLBACK>& _data);
         Semi_Direct(std::vector<double>& cam_intrinsic, std::unique_ptr<SYNC::CALLBACK>& data);
+#else
+        bool Get_data(DF* _data);
+        void runloop(std::unique_ptr<DBLoader>& _data);
+        Semi_Direct(std::vector<double>& cam_intrinsic, std::unique_ptr<DBLoader>& data);
 #endif
     public:
         ~Semi_Direct(){};

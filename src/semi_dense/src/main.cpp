@@ -14,7 +14,7 @@
 #include <vector>
 #include <chrono>
 #include <mutex>
-
+#include <string>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -30,17 +30,18 @@
 #include <g2o/types/sba/types_six_dof_expmap.h>
 
 #include "semi_dense/callback.hpp"
+#include "semi_dense/Frame.hpp"
+#include "semi_dense/Loader.hpp"
 #include "semi_dense/EdgeSE3ProjectDirect.hpp"
 #include "semi_dense/semi_dense.hpp"
 #include "semi_dense/plotTrajectory.hpp"
-#include "semi_dense/extern.hpp"
 
+// #define __FULL_RESOURCE__
 int main(int argc, char** argv)
 {
-#ifdef For_Window   
+#ifdef __ROS__   
     ros::init(argc, argv, "semi_dense_node");
 	ros::NodeHandle nh("~");
-    // SYNC::CALLBACK* mc = new SYNC::CALLBACK(&nh);
     std::unique_ptr<SYNC::CALLBACK> mc = std::make_unique<SYNC::CALLBACK>(&nh);
 
     XmlRpc::XmlRpcValue* camera_intrinsic = new XmlRpc::XmlRpcValue;
@@ -52,14 +53,20 @@ int main(int argc, char** argv)
         double test = (double)camera_intrinsic[0][i];
         cam_intrinsic.push_back(test);
     }
-    // Semi_Direct sd(cam_intrinsic, mc);
     Semi_Direct sd(cam_intrinsic, mc);
-    
-#endif
-#ifdef For_MAC  
+#else  
+    std::unique_ptr<DBLoader> mc = std::make_unique<DBLoader>(9);
+    mc->show = 1;
+
+    // CAMERA_INTRINSIC_PARAM* CIP = new CAMERA_INTRINSIC_PARAM(319.5, 239.5, 525.0, 525.0, 1000.0);
+    std::vector<double> cam_intrinsic = {319.5, 239.5, 525.0, 525.0, 1000.0};
+    // Semi_Direct sd(cam_intrinsic, mc);    
+    // sd.runloop(mc);
+    // Pango::Loader ld;
+    // ld.DrawTrajectory(sd.poses, cam_intrinsic);
+
     std::string path = "/home/cona/Direct_method/data/freiburg1_xyz.txt";
-    CAMERA_INTRINSIC_PARAM* CIP = new CAMERA_INTRINSIC_PARAM(319.5, 239.5, 525.0, 525.0, 1000.0);
-    Loader ld(path, CIP);
+    Pango::Loader ld(path, cam_intrinsic);
     return 0;
 #endif  
 }

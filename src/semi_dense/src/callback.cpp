@@ -83,18 +83,12 @@ void SYNC::CALLBACK::Synchronize(const sensor_msgs::ImageConstPtr& c_image,
                                         const sensor_msgs::PointCloud2ConstPtr& d_points){
     cv_bridge::CvImagePtr c_imgPtr = Convert_Image(c_image);
     cv_bridge::CvImagePtr d_imgPtr = Convert_Image(d_image);
-    // Convert_Pcl2_to_XYZ(d_points);
+    Convert_Pcl2_to_XYZ(d_points);
 
     if(!c_imgPtr->image.empty() && !d_imgPtr->image.empty()){
         Curr_C_mat = c_imgPtr->image.clone();
         Curr_D_mat = d_imgPtr->image.clone();
         // Curr_Dp_mat = dp_imgPtr->image.clone();
-        // if(show){
-        //     cv::imshow("Color", Curr_C_mat);
-        //     cv::imshow("Depth", Curr_D_mat);
-            // cv::imshow("Depth_Point", Curr_Dp_mat);
-        //     cv::waitKey(1);
-        // }
     }
     else
         ROS_INFO("No data");

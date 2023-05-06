@@ -162,6 +162,7 @@ set( g2o_LIBRARIES
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_node 
 src/callback.cpp
+src/Loader.cpp
 src/EdgeSE3ProjectDirect.cpp
 src/plotTrajectory.cpp
 src/semi_dense.cpp
