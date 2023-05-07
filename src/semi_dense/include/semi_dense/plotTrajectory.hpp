@@ -6,6 +6,7 @@
 #include <Eigen/Core>
 #include <unistd.h>
 #include "semi_dense/param.hpp"
+#include "semi_dense/Loader.hpp"
 
 namespace Pango
 {

@@ -15,6 +15,8 @@
 #include <chrono>
 #include <mutex>
 #include <string>
+#include <exception>
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -55,18 +57,24 @@ int main(int argc, char** argv)
     }
     Semi_Direct sd(cam_intrinsic, mc);
 #else  
-    std::unique_ptr<DBLoader> mc = std::make_unique<DBLoader>(9);
-    mc->show = 1;
+    try{
+        std::unique_ptr<DBLoader> mc = std::make_unique<DBLoader>("/home/cona/rgbd_dataset_freiburg2_pioneer_slam3/");
+        mc->show = 1;
+        // CAMERA_INTRINSIC_PARAM* CIP = new CAMERA_INTRINSIC_PARAM(319.5, 239.5, 525.0, 525.0, 1000.0);
+        std::vector<double> cam_intrinsic = {319.5, 239.5, 525.0, 525.0, 1000.0};
+        // Semi_Direct sd(cam_intrinsic, mc);    
+        // sd.runloop(mc);
+        // Pango::Loader ld;
+        // ld.DrawTrajectory(sd.poses, cam_intrinsic);
 
-    // CAMERA_INTRINSIC_PARAM* CIP = new CAMERA_INTRINSIC_PARAM(319.5, 239.5, 525.0, 525.0, 1000.0);
-    std::vector<double> cam_intrinsic = {319.5, 239.5, 525.0, 525.0, 1000.0};
-    // Semi_Direct sd(cam_intrinsic, mc);    
-    // sd.runloop(mc);
-    // Pango::Loader ld;
-    // ld.DrawTrajectory(sd.poses, cam_intrinsic);
-
-    std::string path = "/home/cona/Direct_method/data/freiburg1_xyz.txt";
-    Pango::Loader ld(path, cam_intrinsic);
+        // std::string path = "/home/cona/Direct_method/data/freiburg1_xyz.txt";
+        std::string path = "/home/cona/rgbd_dataset_freiburg2_pioneer_slam3/groundtruth.txt";
+        std::cout << "in" << std::endl;
+        Pango::Loader ld(path, cam_intrinsic);
+    }
+    catch(Exception& e){
+        std::cerr << e.what() << std::endl;
+    }
     return 0;
 #endif  
 }

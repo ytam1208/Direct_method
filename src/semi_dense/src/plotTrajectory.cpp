@@ -14,8 +14,7 @@ bool Pango::Loader::Get_data(std::string& trajectory_file, CAMERA_INTRINSIC_PARA
     std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>> poses;
     std::ifstream fin(trajectory_file);
     if(!fin){
-        std::cout << "cannot find trajectory file at " << trajectory_file << std::endl;
-        return 1;
+        throw Exception("Process exception[" + this_name + "][Get_data]");    
     }
     while (!fin.eof()) {
         double time, tx, ty, tz, qx, qy, qz, qw;
@@ -33,18 +32,18 @@ bool Pango::Loader::Get_data(std::string& trajectory_file, std::vector<double>& 
     std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>> poses;
     std::ifstream fin(trajectory_file);
     if(!fin){
-        std::cout << "cannot find trajectory file at " << trajectory_file << std::endl;
-        return 1;
+        std::cout << "Gotcha" << std::endl;
+        throw Exception("Process exception[" + this_name + "][Get_data]");
     }
-    double cnt = 0.0;
     while (!fin.eof()) {
         double time, tx, ty, tz, qx, qy, qz, qw;
         fin >> time >> tx >> ty >> tz >> qx >> qy >> qz >> qw;
         Eigen::Isometry3d Twr(Eigen::Quaterniond(qw, qx, qy, qz));
         Twr.pretranslate(Eigen::Vector3d(tx, ty, tz));
         poses.push_back(Twr);
-        cnt += 0.01;
     }
+    fin.close();
+    std::cout << "pose size = " << poses.size() << std::endl;
     // Eigen::Isometry3d Twr0(Eigen::Quaterniond(1.3112, 0.8507, 1.5186, 0.8851));
     // Twr0.pretranslate(Eigen::Vector3d(0.2362, -0.0898, -0.3909));
     // poses.push_back(Twr0);
@@ -182,6 +181,7 @@ void Pango::Loader::DrawTrajectory(std::vector<Eigen::Isometry3d, Eigen::aligned
 }
 void Pango::Loader::DrawTrajectory(std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>& poses, std::vector<double>& input){
   // create pangolin window and plot the trajectory
+  std::cout << "DrawTrajectory!" << std::endl;
   pangolin::CreateWindowAndBind("Trajectory Viewer", 1024, 768);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_BLEND);
