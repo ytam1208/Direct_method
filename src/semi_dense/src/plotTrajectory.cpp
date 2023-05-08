@@ -1,10 +1,12 @@
 #include "semi_dense/plotTrajectory.hpp"
 
-Pango::Loader::Loader(std::string& path, std::vector<double>& input):this_name("Loader")
+Pango::Loader::Loader(std::string& path, std::vector<double>& input):
+this_name("Loader"),Pango_col(1024),Pango_row(768)
 {
     Get_data(path, input);
 }
-Pango::Loader::Loader(std::string& path, CAMERA_INTRINSIC_PARAM* input):this_name("Loader")
+Pango::Loader::Loader(std::string& path, CAMERA_INTRINSIC_PARAM* input):
+this_name("Loader"),Pango_col(1024),Pango_row(768)
 {
     Get_data(path, &input);
 }
@@ -12,17 +14,27 @@ Pango::Loader::Loader(std::string& path, CAMERA_INTRINSIC_PARAM* input):this_nam
 bool Pango::Loader::Get_data(std::string& trajectory_file, CAMERA_INTRINSIC_PARAM** input)
 {
     std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>> poses;
-    std::ifstream fin(trajectory_file);
-    if(!fin){
-        throw Exception("Process exception[" + this_name + "][Get_data]");    
+
+    // std::string path_ = "/home/cona/Direct_method/data/groundtruth.txt";
+    std::ifstream fin_G(trajectory_file);
+    if(fin_G.is_open()){
+      try{
+        while(!fin_G.eof()){
+            float time, tx, ty, tz, qx, qy, qz, qw;
+            fin_G >> time >> tx >> ty >> tz >> qx >> qy >> qz >> qw;
+            Eigen::Isometry3d Twr(Eigen::Quaterniond(qw, qx, qy, qz));
+            Twr.pretranslate(Eigen::Vector3d(tx, ty, tz));
+            poses.push_back(Twr);
+        }
+      }
+      catch(...){
+        fin_G.close();
+        throw Exception("Process exception[" + this_name + "][Get_data] check your input data! [Error code] std::bad_alloc");
+      }
+      fin_G.close();
     }
-    while (!fin.eof()) {
-        double time, tx, ty, tz, qx, qy, qz, qw;
-        fin >> time >> tx >> ty >> tz >> qx >> qy >> qz >> qw;
-        Eigen::Isometry3d Twr(Eigen::Quaterniond(qw, qx, qy, qz));
-        Twr.pretranslate(Eigen::Vector3d(tx, ty, tz));
-        poses.push_back(Twr);
-    }
+    else
+        throw Exception("Process exception[" + this_name + "][Get_data] File not found");  
     DrawTrajectory(poses, &input);
     return 0;
 }
@@ -30,20 +42,28 @@ bool Pango::Loader::Get_data(std::string& trajectory_file, CAMERA_INTRINSIC_PARA
 bool Pango::Loader::Get_data(std::string& trajectory_file, std::vector<double>& input)
 {
     std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>> poses;
-    std::ifstream fin(trajectory_file);
-    if(!fin){
-        std::cout << "Gotcha" << std::endl;
-        throw Exception("Process exception[" + this_name + "][Get_data]");
+    
+    // std::string path_ = "/home/cona/Direct_method/data/groundtruth.txt";
+    std::ifstream fin_G(trajectory_file);
+    if(fin_G.is_open()){
+      std::cout << "Reference Data Get.." << std::endl;
+      try{
+        while(!fin_G.eof()){
+            float time, tx, ty, tz, qx, qy, qz, qw;
+            fin_G >> time >> tx >> ty >> tz >> qx >> qy >> qz >> qw;
+            Eigen::Isometry3d Twr(Eigen::Quaterniond(qw, qx, qy, qz));
+            Twr.pretranslate(Eigen::Vector3d(tx, ty, tz));
+            poses.push_back(Twr);
+        }
+      }
+      catch(std::bad_alloc& e){
+        fin_G.close();
+        throw Exception("Process exception[" + this_name + "][Get_data] check your input data! [Error code] std::bad_alloc");
+      }
+      fin_G.close();
     }
-    while (!fin.eof()) {
-        double time, tx, ty, tz, qx, qy, qz, qw;
-        fin >> time >> tx >> ty >> tz >> qx >> qy >> qz >> qw;
-        Eigen::Isometry3d Twr(Eigen::Quaterniond(qw, qx, qy, qz));
-        Twr.pretranslate(Eigen::Vector3d(tx, ty, tz));
-        poses.push_back(Twr);
-    }
-    fin.close();
-    std::cout << "pose size = " << poses.size() << std::endl;
+    else
+        throw Exception("Process exception[" + this_name + "][Get_data] File not found");
     // Eigen::Isometry3d Twr0(Eigen::Quaterniond(1.3112, 0.8507, 1.5186, 0.8851));
     // Twr0.pretranslate(Eigen::Vector3d(0.2362, -0.0898, -0.3909));
     // poses.push_back(Twr0);
@@ -181,24 +201,20 @@ void Pango::Loader::DrawTrajectory(std::vector<Eigen::Isometry3d, Eigen::aligned
 }
 void Pango::Loader::DrawTrajectory(std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>& poses, std::vector<double>& input){
   // create pangolin window and plot the trajectory
-  std::cout << "DrawTrajectory!" << std::endl;
-  pangolin::CreateWindowAndBind("Trajectory Viewer", 1024, 768);
+  pangolin::CreateWindowAndBind("Trajectory Viewer", Pango_col, Pango_row);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
- 
   pangolin::OpenGlRenderState s_cam(
-    pangolin::ProjectionMatrix(1024, 768, input[2], input[3], input[0], input[1], 0.1, input[4]),
+    pangolin::ProjectionMatrix(Pango_col, Pango_row, input[2], input[3], input[0], input[1], 0.1, input[4]),
     pangolin::ModelViewLookAt(0, -0.1, -1.8, 
                               0, 0, 0, 
                               0.0, -1.0, 0.0)
   );
   const int UI_WIDTH = 20 * pangolin::default_font().MaxWidth();
-
   pangolin::View &d_cam = pangolin::CreateDisplay()
-    .SetBounds(0.0, 1.0, pangolin::Attach::Pix(UI_WIDTH), 1.0, -1024.0f / 768.0f)
+    .SetBounds(0.0, 1.0, pangolin::Attach::Pix(UI_WIDTH), 1.0, static_cast<float>(-Pango_col) / static_cast<float>(Pango_row))
     .SetHandler(new pangolin::Handler3D(s_cam));
-
   pangolin::CreatePanel("ui")
       .SetBounds(0.0, 1.0, 0.0, pangolin::Attach::Pix(UI_WIDTH));
   pangolin::Var<bool> Start_checkbox("ui.Start",false,true);
@@ -209,12 +225,12 @@ void Pango::Loader::DrawTrajectory(std::vector<Eigen::Isometry3d, Eigen::aligned
   pangolin::Var<int> Other("ui.Other_node", 1, 2, 10);  
   pangolin::Var<bool> Reference_checkbox("ui.Reference",false,true);
   pangolin::Var<bool> Cam_View_reset("ui.View_reset",false,true);
-
+  std::cout << "DrawTrajectory! Poses size = " << poses.size() << std::endl;
   int count = 0;
   while (pangolin::ShouldQuit() == false) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if(Cam_View_reset){
-      s_cam.SetProjectionMatrix(pangolin::ProjectionMatrix(1024, 768, input[2], input[3], input[0], input[1], 0.1, input[4]));
+      s_cam.SetProjectionMatrix(pangolin::ProjectionMatrix(Pango_col, Pango_row, input[2], input[3], input[0], input[1], 0.1, input[4]));
       s_cam.SetModelViewMatrix(pangolin::ModelViewLookAt(
                               0,   -0.1, -1.8, 
                               0,      0,    0, 
@@ -243,15 +259,23 @@ void Pango::Loader::DrawTrajectory(std::vector<Eigen::Isometry3d, Eigen::aligned
     DrawNode(poses, poses.size()-1, 0.01);
 
     glLineWidth(1);
-    for (size_t i = 0; i < poses.size(); i++) {
+    for(size_t i = 0; i < poses.size(); i++){
       glBegin(GL_LINES);
       glColor3f(1.0f-(float)Back_G, 1.0f-(float)Back_G, 1.0f-(float)Back_G);
-      auto p1 = poses[i], p2 = poses[i + 1];
-      glVertex3d(p1.translation()[0], p1.translation()[1], p1.translation()[2]);
-      glVertex3d(p2.translation()[0], p2.translation()[1], p2.translation()[2]);
+      // auto p1;
+      if(i < poses.size()-1){
+        auto p1 = poses[i], p2 = poses[i+1];
+        glVertex3d(p1.translation()[0], p1.translation()[1], p1.translation()[2]);
+        glVertex3d(p2.translation()[0], p2.translation()[1], p2.translation()[2]);
+      }
+      else{
+          auto p1 = poses[0], p2 = poses[poses.size()-1];
+          glVertex3d(p1.translation()[0], p1.translation()[1], p1.translation()[2]);
+          glVertex3d(p2.translation()[0], p2.translation()[1], p2.translation()[2]);
+      }
       glEnd();
     }
     pangolin::FinishFrame();
-    usleep(50000);   // sleep 5 ms
+    // usleep(50000);   // sleep 5 ms
   }
 }

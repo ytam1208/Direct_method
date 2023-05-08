@@ -57,7 +57,8 @@ void Semi_Direct::runloop(std::unique_ptr<SYNC::CALLBACK>& _data){
     // Visualize.join();
 }
 #else
-Semi_Direct::Semi_Direct(std::vector<double>& cam_intrinsic, std::unique_ptr<DBLoader>& data):id(1){
+Semi_Direct::Semi_Direct(std::vector<double>& cam_intrinsic, std::unique_ptr<DBLoader>& data):
+id(1),this_name("Semi_Direct"){
     initalize(cam_intrinsic);
     // runloop(data);
 }
@@ -130,24 +131,29 @@ inline Eigen::Vector2d Semi_Direct::project3Dto2D ( float x, float y, float z, f
 
 void Semi_Direct::compute_gradient(bool* f_i){
     if(!(*f_i)){
-        for(int x=10; x<curr_gray.cols-10; x++)
-            for(int y=10; y<curr_gray.rows-10; y++){
-                Eigen::Vector2d delta(
-                    curr_gray.ptr<uchar>(y)[x+1] - curr_gray.ptr<uchar>(y)[x-1], 
-                    curr_gray.ptr<uchar>(y+1)[x] - curr_gray.ptr<uchar>(y-1)[x]
-                );
-                if(delta.norm() < 50)
-                    continue;
-                ushort d = curr_depth.at<ushort>(y,x);
-                // ushort d = curr_depth.ptr<ushort> (y)[x];
-                if(d==0.0f)
-                    continue;
-                Eigen::Vector3d p3d = project2Dto3D(x, y, d, fx, fy, cx, cy, depth_scale);
-                float grayscale = float(curr_gray.ptr<uchar>(y)[x]);
-                measurements.push_back(Measurement(p3d, grayscale));
-            }
-        prev_color = curr_color.clone();
-        *f_i = true;
+        try{
+            for(int x=10; x<curr_gray.cols-10; x++)
+                for(int y=10; y<curr_gray.rows-10; y++){
+                    Eigen::Vector2d delta(
+                        curr_gray.ptr<uchar>(y)[x+1] - curr_gray.ptr<uchar>(y)[x-1], 
+                        curr_gray.ptr<uchar>(y+1)[x] - curr_gray.ptr<uchar>(y-1)[x]
+                    );
+                    if(delta.norm() < 50)
+                        continue;
+                    ushort d = curr_depth.at<ushort>(y,x);
+                    // ushort d = curr_depth.ptr<ushort> (y)[x];
+                    if(d==0.0f)
+                        continue;
+                    Eigen::Vector3d p3d = project2Dto3D(x, y, d, fx, fy, cx, cy, depth_scale);
+                    float grayscale = float(curr_gray.ptr<uchar>(y)[x]);
+                    measurements.push_back(Measurement(p3d, grayscale));
+                }
+            prev_color = curr_color.clone();
+            *f_i = true;
+        }
+        catch(std::bad_alloc& e){
+            throw Exception("Process exception[" + this_name + "][compute_gradient] check your input data! [Error code] std::bad_alloc");
+        }
     }  
 }
 

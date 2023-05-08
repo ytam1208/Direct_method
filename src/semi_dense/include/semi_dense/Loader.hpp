@@ -14,35 +14,32 @@
 #include "semi_dense/param.hpp"
 #include "semi_dense/Frame.hpp"
 
-class Exception : public std::exception {
-    public:
-        Exception(std::string name = "") : std::exception(), name_(name) {}
-        virtual ~Exception() throw() {}
-        virtual const char* what() const noexcept { return name_.c_str(); }
-    protected:
-        std::string name_;
+class Exception : public std::exception{
+protected:
+    std::string name_;
+public:
+    Exception(std::string name = "") : std::exception(), name_(name) {}
+    virtual ~Exception() throw() {}
+    virtual const char* what() const noexcept { return name_.c_str(); }
 };
 
 class DBLoader : public GET_PARAM
 {
-private:
+protected:
     std::string this_name;
-    bool Load_flag;
 public:
     std::vector<DF> frames;
-    bool Get_Image_data(const int img_cnt);
-    bool Get_Image_data(const std::string& path);
+    void Get_Image_data(const int img_cnt);
+    void Get_Image_data(const std::string& path);
 public:
     DBLoader(const int img_cnt){
             std::cout << "Road Data [" << img_cnt << "]!" << std::endl;
-            Load_flag = this->Get_Image_data(img_cnt);
+            this->Get_Image_data(img_cnt);
     }
     DBLoader(const std::string& path):
-    this_name("DBLoader"), Load_flag(false){
+    this_name("DBLoader"){
             std::cout << "DB Road processing.." << std::endl;
-            Load_flag = this->Get_Image_data(path);
-            if(!Load_flag)
-                throw Exception("Process exception[" + this_name + "][Get_Image_data]");
+            this->Get_Image_data(path);
     }
     ~DBLoader(){    
         std::vector<DF>().swap(frames);

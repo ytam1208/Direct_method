@@ -3,6 +3,7 @@
 #include "semi_dense/callback.hpp"
 #include "semi_dense/Loader.hpp"
 #include "semi_dense/plotTrajectory.hpp"
+#define getName(VariableName) # VariableName 
 
 struct Measurement
 {
@@ -13,6 +14,8 @@ struct Measurement
 
 class Semi_Direct: public CAMERA_INTRINSIC_PARAM
 {
+    protected:
+        std::string this_name;
     private:
         int id;
         cv::Mat curr_color, curr_depth, curr_gray;

@@ -12,8 +12,12 @@ namespace Pango
 {
     class Loader
     {
+    protected:
+        int Pango_col;
+        int Pango_row;
         std::string this_name;
-
+    private:
+        std::mutex load_mtx;
     public:
         bool Get_data(std::string& trajectory_file, CAMERA_INTRINSIC_PARAM** input);
         bool Get_data(std::string& trajectory_file, std::vector<double>& input);
