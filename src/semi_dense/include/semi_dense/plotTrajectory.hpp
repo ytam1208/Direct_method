@@ -5,6 +5,7 @@
 #include <pangolin/display/default_font.h>
 #include <Eigen/Core>
 #include <unistd.h>
+#include "semi_dense/semi_dense.hpp"
 #include "semi_dense/param.hpp"
 #include "semi_dense/Loader.hpp"
 
@@ -18,15 +19,16 @@ namespace Pango
         std::string this_name;
     private:
         std::mutex load_mtx;
+        std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>> poses;
     public:
-        bool Get_data(std::string& trajectory_file, CAMERA_INTRINSIC_PARAM** input);
-        bool Get_data(std::string& trajectory_file, std::vector<double>& input);
+        bool Get_data(std::string& trajectory_file);
         void DrawNode(std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>& poses, int i, float scale);
-        void DrawTrajectory(std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>& poses, CAMERA_INTRINSIC_PARAM*** input);
+        void DrawTrajectory(std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>& poses, CAMERA_INTRINSIC_PARAM** input);
         void DrawTrajectory(std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>& poses, std::vector<double>& input);
+
         Loader(){}
         Loader(std::string& path, CAMERA_INTRINSIC_PARAM* input);
-        Loader(std::string& path, std::vector<double>& input);
+        Loader(std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>& poses, std::string& path, std::vector<double>& input);
         ~Loader(){}
     };
 }

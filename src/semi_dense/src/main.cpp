@@ -59,23 +59,21 @@ int main(int argc, char** argv)
 #else  
     try{
         // std::unique_ptr<DBLoader> mc = std::make_unique<DBLoader>(9);
-        std::unique_ptr<DBLoader> mc = std::make_unique<DBLoader>("/home/cona/rgbd_dataset_freiburg2_pioneer_slam3/");
+        // std::unique_ptr<DBLoader> mc = std::make_unique<DBLoader>("/home/cona/rgbd_dataset_freiburg2_pioneer_slam3/");
+        std::unique_ptr<DBLoader> mc = std::make_unique<DBLoader>("/home/cona/Direct_method/data");        
         mc->show = 1;
         // CAMERA_INTRINSIC_PARAM* CIP = new CAMERA_INTRINSIC_PARAM(319.5, 239.5, 525.0, 525.0, 1000.0);
-        std::vector<double> cam_intrinsic = {319.5, 239.5, 525.0, 525.0, 1000.0};
+        std::vector<double> cam_intrinsic = {325.5, 253.5, 518.0, 519.0, 1000.0};
         Semi_Direct sd(cam_intrinsic, mc);    
         sd.runloop(mc);
-        Pango::Loader ld;
-        ld.DrawTrajectory(sd.poses, cam_intrinsic);
+        // std::string path = "/home/cona/Direct_method/data/groundtruth.txt";
+        // Pango::Loader ld(sd.ob_poses, path, cam_intrinsic);
 
         // std::string path = "/home/cona/Direct_method/data/freiburg1_xyz.txt";
-        // std::string path = "/home/cona/rgbd_dataset_freiburg2_pioneer_slam3/groundtruth_test.txt";
         // Pango::Loader ld(path, cam_intrinsic);
     }
     catch(Exception& e){
         std::cerr << e.what() << std::endl;
     }
-
-    return 0;
-#endif  
+#endif
 }

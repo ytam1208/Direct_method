@@ -57,63 +57,61 @@ void Semi_Direct::runloop(std::unique_ptr<SYNC::CALLBACK>& _data){
     // Visualize.join();
 }
 #else
-Semi_Direct::Semi_Direct(std::vector<double>& cam_intrinsic, std::unique_ptr<DBLoader>& data):
-id(1),this_name("Semi_Direct"){
-    initalize(cam_intrinsic);
-    // runloop(data);
-}
-
-bool Semi_Direct::Get_data(DF* _data){
-    if(!(_data)->color.empty() && !(_data)->depth.empty()){
-        data_mtx.lock();
-        curr_color = (_data)->color.clone();
-        curr_depth = (_data)->depth.clone();
-        cv::cvtColor(curr_color, curr_gray, cv::COLOR_BGR2GRAY);
-        // measurements.clear();
-        data_mtx.unlock();
-        return true;
-    }
-    else{
-        ROS_ERROR("[Semi_Direct][Get_data] No Get data!! Curr_C_mat[%d], Curr_D_mat[%d]", 
-        (_data)->color.empty(), (_data)->depth.empty());
-        return false;
-    }
-}
-
-void Semi_Direct::runloop(std::unique_ptr<DBLoader>& _data){
-    bool show_flag = (_data)->show;
-    bool first_index = false;
-    DBLoader* DB = _data.get();
-    for(auto frame : DB->frames){
-        if(!Get_data(&frame)){}
-        else{
-            compute_gradient(&first_index);
-            std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
-            PoseEstimationDirect();
-            std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
-            std::chrono::duration<double> time_used = std::chrono::duration_cast<std::chrono::duration<double>> (t2-t1);
-            std::cout << "direct method costs time: " << time_used.count() << " seconds." << std::endl;
-            // if(show_flag) Display_Feature();
-        }
-    }
-}
-#endif
-void Semi_Direct::initalize(std::vector<double>& c_i){
+Semi_Direct::Semi_Direct(std::vector<double>& c_i, std::unique_ptr<DBLoader>& data):
+this_name("Semi_Direct"), idx(0){
     cx = c_i[0];
     cy = c_i[1];
     fx = c_i[2];
     fy = c_i[3];
-    depth_scale = c_i[4];
-    // depth_scale = 1;
-    ROS_INFO("Initalize Cam_Param Get!!!");
-    ROS_INFO("cx=%lf, cy=%lf, fx=%lf, fy=%lf, depth_Scale=%lf", cx, cy, fx, fy, depth_scale);
 
     srand((unsigned int) time(0));
     K << fx,  0.f, cx,
         0.f,  fy,  cy,
         0.f, 0.f, 1.0f;
-
     Tcw = Eigen::Isometry3d::Identity();
+}
+
+void Semi_Direct::runloop(std::unique_ptr<DBLoader>& _data){
+    DBLoader* DB = _data.get();
+    bool show_flag = (*DB).show;
+    bool first_index = false;
+    int index(0);
+    for(auto frame : DB->frames){
+        Get_data(frame);
+        std::cout << index << std::endl;
+        if(index == 0)
+            compute_gradient(nullptr);
+        else{
+            std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+            PoseEstimationDirect();
+            std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+            std::chrono::duration<double> time_used = std::chrono::duration_cast<std::chrono::duration<double>> (t2-t1);
+            std::cout << "direct method costs time: " << time_used.count() << " seconds." << std::endl;
+        }
+        index++;
+    }
+}
+
+bool Semi_Direct::Get_data(DF& _data){
+    if(!(_data.color.empty()) && !(_data.depth.empty())){
+        data_mtx.lock();
+        curr_color = (_data).color.clone();
+        curr_depth = (_data).depth.clone();
+        cv::cvtColor(curr_color, curr_gray, cv::COLOR_BGR2GRAY);
+        // measurements.clear();
+        data_mtx.unlock();
+
+        cv::imshow("color", curr_color);
+        cv::imshow("gray", curr_gray);
+        cv::imshow("depth", curr_depth);
+        cv::waitKey(0);
+        return true;
+    }
+    else{
+        ROS_ERROR("[Semi_Direct][Get_data] No Get data!! Curr_C_mat[%d], Curr_D_mat[%d]", 
+        (_data).color.empty(), (_data).depth.empty());
+        return false;
+    }
 }
 
 inline Eigen::Vector3d Semi_Direct::project2Dto3D(int x, int y, int d, float fx, float fy, float cx, float cy, float scale){
@@ -130,71 +128,27 @@ inline Eigen::Vector2d Semi_Direct::project3Dto2D ( float x, float y, float z, f
 }
 
 void Semi_Direct::compute_gradient(bool* f_i){
-    if(!(*f_i)){
-        try{
-            for(int x=10; x<curr_gray.cols-10; x++)
-                for(int y=10; y<curr_gray.rows-10; y++){
-                    Eigen::Vector2d delta(
-                        curr_gray.ptr<uchar>(y)[x+1] - curr_gray.ptr<uchar>(y)[x-1], 
-                        curr_gray.ptr<uchar>(y+1)[x] - curr_gray.ptr<uchar>(y-1)[x]
-                    );
-                    if(delta.norm() < 50)
-                        continue;
-                    ushort d = curr_depth.at<ushort>(y,x);
-                    // ushort d = curr_depth.ptr<ushort> (y)[x];
-                    if(d==0.0f)
-                        continue;
-                    Eigen::Vector3d p3d = project2Dto3D(x, y, d, fx, fy, cx, cy, depth_scale);
-                    float grayscale = float(curr_gray.ptr<uchar>(y)[x]);
-                    measurements.push_back(Measurement(p3d, grayscale));
-                }
-            prev_color = curr_color.clone();
-            *f_i = true;
-        }
-        catch(std::bad_alloc& e){
-            throw Exception("Process exception[" + this_name + "][compute_gradient] check your input data! [Error code] std::bad_alloc");
-        }
-    }  
-}
-
-void Semi_Direct::Display_Feature(){
     try{
-        if(prev_color.empty() || curr_color.empty() || curr_depth.empty())    
-            throw;
-        cv::Mat prev_img(prev_color.rows, prev_color.cols, CV_8UC3);
-        cv::Mat curr_img(prev_color.rows, prev_color.cols, CV_8UC3);
-
-        prev_color.copyTo(prev_img);
-        curr_color.copyTo(curr_img);
-        for(Measurement m : measurements){
-            Eigen::Vector3d prev_p = m.pos_world;
-            Eigen::Vector2d pixel_prev = project3Dto2D (prev_p(0,0), prev_p(1,0), prev_p(2,0), fx, fy, cx, cy);
-            Eigen::Vector3d curr_p = Tcw*m.pos_world;
-            Eigen::Vector2d pixel_curr = project3Dto2D (curr_p(0,0), curr_p(1,0), curr_p(2,0), fx, fy, cx, cy);
-
-            uchar b = 0;
-            uchar g = 250;
-            uchar r = 0;
-
-            prev_img.ptr<uchar>(pixel_prev(1,0))[int(pixel_prev(0,0))*3] = b;
-            prev_img.ptr<uchar>(pixel_prev(1,0))[int(pixel_prev(0,0))*3+1] = g;
-            prev_img.ptr<uchar>(pixel_prev(1,0))[int(pixel_prev(0,0))*3+2] = r;
-
-            curr_color.ptr<uchar>(pixel_curr(1,0))[int(pixel_curr(0,0))*3] = b;
-            curr_color.ptr<uchar>(pixel_curr(1,0))[int(pixel_curr(0,0))*3+1] = g;
-            curr_color.ptr<uchar>(pixel_curr(1,0))[int(pixel_curr(0,0))*3+2] = r;
-                
-            cv::circle (prev_img, cv::Point2d (pixel_prev(0,0), pixel_prev(1,0)), 2, cv::Scalar(b,g,r), 2);
-            cv::circle (curr_color, cv::Point2d (pixel_curr(0,0), pixel_curr(1,0)), 2, cv::Scalar(b,g,r), 2);
-        }
-        cv::imshow ( "prev_img", prev_img );
-        cv::imshow ( "curr_img", curr_color );
-        cv::imshow ( "curr_depth_img", curr_depth );
-        cv::waitKey ( 0 );
-
+        for(int x=10; x<curr_gray.cols-10; x++)
+            for(int y=10; y<curr_gray.rows-10; y++){
+                Eigen::Vector2d delta(
+                    curr_gray.ptr<uchar>(y)[x+1] - curr_gray.ptr<uchar>(y)[x-1], 
+                    curr_gray.ptr<uchar>(y+1)[x] - curr_gray.ptr<uchar>(y-1)[x]
+                );
+                if(delta.norm() < 50)
+                    continue;
+                ushort d = curr_depth.at<ushort>(y,x);
+                // ushort d = curr_depth.ptr<ushort> (y)[x];
+                if(d==0.0f)
+                    continue;
+                Eigen::Vector3d p3d = project2Dto3D(x, y, d, fx, fy, cx, cy, depth_scale);
+                float grayscale = float(curr_gray.ptr<uchar>(y)[x]);
+                measurements.push_back(Measurement(p3d, grayscale));
+            }
+        prev_color = curr_color.clone();
     }
-    catch(...){
-        ROS_ERROR("No data Display!");
+    catch(std::bad_alloc& e){
+        throw Exception("Process exception[" + this_name + "][compute_gradient] check your input data! [Error code] std::bad_alloc");
     }
 }
 
@@ -214,6 +168,7 @@ bool Semi_Direct::PoseEstimationDirect(){
     pose->setId(0);
     optimizer.addVertex(pose);
 
+    int id(0);
     for (Measurement m: measurements){
         EdgeSE3ProjectDirect* edge = new EdgeSE3ProjectDirect(
             m.pos_world,
@@ -240,5 +195,4 @@ bool Semi_Direct::PoseEstimationDirect(){
     return true;
 }
 
-
-
+#endif

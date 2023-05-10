@@ -4,7 +4,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
-
+#include <Eigen/Dense>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -29,6 +29,8 @@ protected:
     std::string this_name;
 public:
     std::vector<DF> frames;
+    std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>> poses;
+    void Get_ground_data(const std::string& path);
     void Get_Image_data(const int img_cnt);
     void Get_Image_data(const std::string& path);
 public:
@@ -40,6 +42,7 @@ public:
     this_name("DBLoader"){
             std::cout << "DB Road processing.." << std::endl;
             this->Get_Image_data(path);
+            // this->Get_ground_data(path);
     }
     ~DBLoader(){    
         std::vector<DF>().swap(frames);
