@@ -52,13 +52,11 @@ class Semi_Direct: public CAMERA_INTRINSIC_PARAM
     public:
         std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>> poses;
     private:
-        Odom om;
         EdgeSE3ProjectDirect ES3;
-        std::mutex data_mtx;
     public:    
         inline Eigen::Vector3d project2Dto3D(int x, int y, int d, float fx, float fy, float cx, float cy, float scale);
         inline Eigen::Vector2d project3Dto2D ( float x, float y, float z, float fx, float fy, float cx, float cy );
-        void compute_gradient(bool* f_i);
+        void compute_gradient();
         void Display_Feature();
         bool PoseEstimationDirect();
 

@@ -63,7 +63,9 @@ int main(int argc, char** argv)
         std::unique_ptr<DBLoader> mc = std::make_unique<DBLoader>("/home/cona/Direct_method/data");        
         mc->show = 1;
         // CAMERA_INTRINSIC_PARAM* CIP = new CAMERA_INTRINSIC_PARAM(319.5, 239.5, 525.0, 525.0, 1000.0);
-        std::vector<double> cam_intrinsic = {325.5, 253.5, 518.0, 519.0, 1000.0};
+        std::vector<double> cam_intrinsic = {325.5, 253.5, 518.0, 519.0, 1000.0};   //desk
+        // std::vector<double> cam_intrinsic = {319.5, 239.5, 525.0, 525.0, 1000.0};   //pioneer
+
         Semi_Direct sd(cam_intrinsic, mc);    
         sd.runloop(mc);
         // std::string path = "/home/cona/Direct_method/data/groundtruth.txt";
