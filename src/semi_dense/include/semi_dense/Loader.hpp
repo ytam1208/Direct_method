@@ -42,10 +42,11 @@ public:
     this_name("DBLoader"){
             std::cout << "DB Road processing.." << std::endl;
             this->Get_Image_data(path);
-            // this->Get_ground_data(path);
+            this->Get_ground_data(path);
     }
     ~DBLoader(){    
         std::vector<DF>().swap(frames);
+        std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>().swap(poses);
     }
 };
 

@@ -25,15 +25,13 @@ bool Pango::Loader::Get_data(std::string& trajectory_file)
             Eigen::Isometry3d Twr(Eigen::Quaterniond(qw, qx, qy, qz));
             Twr.pretranslate(Eigen::Vector3d(tx, ty, tz));
             poses.push_back(Twr);
-            cnt++;
-            if(cnt > 5000)  break;
         }
+        fin_G.close();
       }
       catch(...){
         fin_G.close();
         throw Exception("Process exception[" + this_name + "][Get_data] check your input data! [Error code] std::bad_alloc");
       }
-      fin_G.close();
     }
     else
         throw Exception("Process exception[" + this_name + "][Get_data] File not found");  
@@ -107,20 +105,20 @@ void Pango::Loader::DrawTrajectory(std::vector<Eigen::Isometry3d, Eigen::aligned
       if(Reference_checkbox){
         glLineWidth(Other);
         for (size_t i = 0; i < poses.size(); i++)
-          DrawNode(poses, i, 0.01);
+          DrawNode(poses, i, 0.1);
       }
         
       if(count > poses.size()-1) count = 0;
 
       glLineWidth(Ober);
-      DrawNode(poses, count, 0.01);
+      DrawNode(poses, count, 0.1);
       count++;
     };
     glLineWidth(First);
-    DrawNode(poses, 0, 0.01);
+    DrawNode(poses, 0, 0.1);
 
     glLineWidth(Last);
-    DrawNode(poses, poses.size()-1, 0.01);
+    DrawNode(poses, poses.size()-1, 0.1);
 
     glLineWidth(1);
     for (size_t i = 0; i < poses.size(); i++) {

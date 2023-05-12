@@ -1,7 +1,7 @@
 #include "semi_dense/Loader.hpp"
 
 void DBLoader::Get_ground_data(const std::string& path){
-    std::string path_ = path + "/groundtruth.txt";
+    std::string path_ = path + "/test_groundtruth.txt";
     std::ifstream fin_G(path_);
     if(fin_G.is_open()){
       try{
@@ -25,7 +25,7 @@ void DBLoader::Get_ground_data(const std::string& path){
 
 void DBLoader::Get_Image_data(const int img_cnt){
     std::string path_to_dataset = "/home/cona/Direct_method/data";
-    std::string associate_file = path_to_dataset + "/test_associate.txt";
+    std::string associate_file = path_to_dataset + "/associate.txt";
     std::string rgb_file, depth_file, time_rgb, time_depth;
     cv::Mat color, depth, gray;
     DF frame;

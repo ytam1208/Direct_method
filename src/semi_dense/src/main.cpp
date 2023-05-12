@@ -7,6 +7,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <image_transport/image_transport.h>
 #include <message_filters/sync_policies/approximate_time.h>
+#include "tf2_msgs/TFMessage.h"
 
 #include <iostream>
 #include <exception>
@@ -37,45 +38,60 @@
 #include "semi_dense/EdgeSE3ProjectDirect.hpp"
 #include "semi_dense/semi_dense.hpp"
 #include "semi_dense/plotTrajectory.hpp"
+#include "semi_dense/ROS_plotTrajectory.hpp"
 
-// #define __ROS__
+#define __ROS__
+// #define __View_Pangoline__
 int main(int argc, char** argv)
 {
+    std::vector<double> cam_intrinsic = {325.5, 253.5, 518.0, 519.0, 1000.0};   //desk
+    std::unique_ptr<DBLoader> mc = std::make_unique<DBLoader>("/home/cona/Direct_method/data");        
+    // std::vector<double> cam_intrinsic = {319.5, 239.5, 525.0, 525.0, 1000.0};   //pioneer
+    // std::unique_ptr<DBLoader> mc = std::make_unique<DBLoader>("/home/cona/rgbd_dataset_freiburg2_pioneer_slam3/");
+    mc->show = 1;
+
 #ifdef __ROS__   
     ros::init(argc, argv, "semi_dense_node");
-	ros::NodeHandle nh("~");
-    std::unique_ptr<SYNC::CALLBACK> mc = std::make_unique<SYNC::CALLBACK>(&nh);
-
-    XmlRpc::XmlRpcValue* camera_intrinsic = new XmlRpc::XmlRpcValue;
-    nh.getParam("/Set_Display", mc->show);
-    nh.getParam("/CAMERA_INTRINSIC_PARAM", *camera_intrinsic);
-
-    std::vector<double> cam_intrinsic;
-    for(int i = 0; i < camera_intrinsic[0].size(); i++){
-        double test = (double)camera_intrinsic[0][i];
-        cam_intrinsic.push_back(test);
-    }
-    Semi_Direct sd(cam_intrinsic, mc);
-#else  
+	// ros::NodeHandle nh("~");
+    ros::NodeHandle nh1;
+    ros::Publisher tf_gt_pub = nh1.advertise<tf2_msgs::TFMessage>("tf", 10);
+    ros::Publisher tf_ob_pub = nh1.advertise<tf2_msgs::TFMessage>("tf", 1);
+    // XmlRpc::XmlRpcValue* camera_intrinsic = new XmlRpc::XmlRpcValue;
+    // nh.getParam("/Set_Display", mc->show);
+    // nh.getParam("/CAMERA_INTRINSIC_PARAM", *camera_intrinsic);
+#endif
     try{
-        // std::unique_ptr<DBLoader> mc = std::make_unique<DBLoader>(9);
-        // std::unique_ptr<DBLoader> mc = std::make_unique<DBLoader>("/home/cona/rgbd_dataset_freiburg2_pioneer_slam3/");
-        std::unique_ptr<DBLoader> mc = std::make_unique<DBLoader>("/home/cona/Direct_method/data");        
-        mc->show = 1;
-        // CAMERA_INTRINSIC_PARAM* CIP = new CAMERA_INTRINSIC_PARAM(319.5, 239.5, 525.0, 525.0, 1000.0);
-        std::vector<double> cam_intrinsic = {325.5, 253.5, 518.0, 519.0, 1000.0};   //desk
-        // std::vector<double> cam_intrinsic = {319.5, 239.5, 525.0, 525.0, 1000.0};   //pioneer
-
         Semi_Direct sd(cam_intrinsic, mc);    
         sd.runloop(mc);
-        // std::string path = "/home/cona/Direct_method/data/groundtruth.txt";
-        // Pango::Loader ld(sd.ob_poses, path, cam_intrinsic);
-
+#ifdef __View_Pangoline__
+        std::string path = "/home/cona/Direct_method/data/test_groundtruth.txt";
         // std::string path = "/home/cona/Direct_method/data/freiburg1_xyz.txt";
-        // Pango::Loader ld(path, cam_intrinsic);
+        Pango::Loader ld(sd.poses, path, cam_intrinsic);
+#endif
+#if defined(__ROS__) && !defined(__View_Pangoline__)
+        ros::Rate rate(30);
+        Viewer vd;
+
+        int idx = 0;
+        int Max_size = sd.poses.size();
+        while(ros::ok()){
+            tf2_msgs::TFMessage tf_list1, tf_list2;
+
+            vd("GT", mc->poses, tf_list1);
+            vd("Ob", sd.poses[idx], idx, tf_list2);
+
+            // tf_gt_pub.publish(tf_list1);
+            tf_ob_pub.publish(tf_list2);
+
+            idx++;
+            ros::spinOnce();
+            rate.sleep();
+        }
+#endif
     }
     catch(Exception& e){
         std::cerr << e.what() << std::endl;
     }
-#endif
+
+    return 0;
 }
