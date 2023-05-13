@@ -1,8 +1,7 @@
 #include "semi_dense/Loader.hpp"
 
-void DBLoader::Get_ground_data(const std::string& path){
-    std::string path_ = path + "/test_groundtruth.txt";
-    std::ifstream fin_G(path_);
+void DBLoader::Get_ground_data(const std::string& ground_path){
+    std::ifstream fin_G(ground_path);
     if(fin_G.is_open()){
       try{
         while(!fin_G.eof()){
@@ -42,18 +41,17 @@ void DBLoader::Get_Image_data(const int img_cnt){
     }
 }
 
-void DBLoader::Get_Image_data(const std::string& path){
-    std::string associate_file = path + "/associate.txt";
+void DBLoader::Get_Image_data(const std::string& ass_path, const std::string& local_path){
     std::string rgb_file, depth_file, time_rgb, time_depth;
     cv::Mat color, depth, gray;
     DF frame;
-    std::ifstream fin(associate_file);
+    std::ifstream fin(ass_path);
     if(fin.is_open()){
         try{
             while(!fin.eof()){
                 fin >> time_rgb >> rgb_file >> time_depth >> depth_file;
-                frame.color = cv::imread(path + "/" + rgb_file);
-                frame.depth = cv::imread(path + "/" + depth_file, -1);
+                frame.color = cv::imread(local_path + rgb_file);
+                frame.depth = cv::imread(local_path + depth_file, -1);
                 if (frame.color.data==nullptr || frame.depth.data==nullptr)
                     continue; 
                 cv::cvtColor (frame.color, frame.gray, cv::COLOR_BGR2GRAY);
@@ -66,7 +64,7 @@ void DBLoader::Get_Image_data(const std::string& path){
             throw Exception("Process exception[" + this_name + "][Get_Image_data] check your input data! [Error code] std::bad_alloc");
         }
         std::cout << "DB Data[" << frames.size() << "] Load!" << std::endl;
-        std::cout << "Load!!" << path << std::endl;
+        std::cout << "Load!!" << ass_path << std::endl;
     }
     else
         throw Exception("Process exception[" + this_name + "][Get_Image_data] Failed associate.txt!");

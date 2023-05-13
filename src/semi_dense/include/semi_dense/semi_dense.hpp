@@ -24,7 +24,7 @@ class Semi_Direct: public CAMERA_INTRINSIC_PARAM
     private:
         int idx;
         cv::Mat curr_color, curr_depth, curr_gray;
-        cv::Mat prev_color;
+        cv::Mat prev_color, prev_depth, prev_gray;
         Eigen::Matrix3f K;
         Eigen::Vector4f trans;
         Eigen::Quaternionf rotation;

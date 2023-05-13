@@ -40,12 +40,16 @@
 #include "semi_dense/plotTrajectory.hpp"
 #include "semi_dense/ROS_plotTrajectory.hpp"
 
-#define __ROS__
-// #define __View_Pangoline__
+// #define __ROS__
+#define __View_Pangoline__
 int main(int argc, char** argv)
 {
     std::vector<double> cam_intrinsic = {325.5, 253.5, 518.0, 519.0, 1000.0};   //desk
-    std::unique_ptr<DBLoader> mc = std::make_unique<DBLoader>("/home/cona/Direct_method/data");        
+    std::string local_path = "/home/cona/Direct_method/data/";
+    std::string ground_truth = local_path + "test_groundtruth.txt";
+    std::string associate_path = local_path + "associate.txt";
+
+    std::unique_ptr<DBLoader> mc = std::make_unique<DBLoader>(local_path, ground_truth, associate_path);        
     // std::vector<double> cam_intrinsic = {319.5, 239.5, 525.0, 525.0, 1000.0};   //pioneer
     // std::unique_ptr<DBLoader> mc = std::make_unique<DBLoader>("/home/cona/rgbd_dataset_freiburg2_pioneer_slam3/");
     mc->show = 1;
@@ -54,7 +58,7 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "semi_dense_node");
 	// ros::NodeHandle nh("~");
     ros::NodeHandle nh1;
-    ros::Publisher tf_gt_pub = nh1.advertise<tf2_msgs::TFMessage>("tf", 10);
+    ros::Publisher tf_gt_pub = nh1.advertise<tf2_msgs::TFMessage>("tf", 1);
     ros::Publisher tf_ob_pub = nh1.advertise<tf2_msgs::TFMessage>("tf", 1);
     // XmlRpc::XmlRpcValue* camera_intrinsic = new XmlRpc::XmlRpcValue;
     // nh.getParam("/Set_Display", mc->show);
@@ -64,9 +68,8 @@ int main(int argc, char** argv)
         Semi_Direct sd(cam_intrinsic, mc);    
         sd.runloop(mc);
 #ifdef __View_Pangoline__
-        std::string path = "/home/cona/Direct_method/data/test_groundtruth.txt";
         // std::string path = "/home/cona/Direct_method/data/freiburg1_xyz.txt";
-        Pango::Loader ld(sd.poses, path, cam_intrinsic);
+        Pango::Loader ld(ground_truth, cam_intrinsic, sd.poses, mc->poses);
 #endif
 #if defined(__ROS__) && !defined(__View_Pangoline__)
         ros::Rate rate(30);

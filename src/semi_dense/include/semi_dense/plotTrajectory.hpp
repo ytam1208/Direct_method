@@ -24,11 +24,15 @@ namespace Pango
         bool Get_data(std::string& trajectory_file);
         void DrawNode(std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>& poses, int i, float scale);
         void DrawTrajectory(std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>& poses, CAMERA_INTRINSIC_PARAM** input);
-        void DrawTrajectory(std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>& poses, std::vector<double>& input);
+        void DrawTrajectory(std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>& ob_poses, 
+                                std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>& ref_poses, 
+                                    std::vector<double>& input);
 
         Loader(){}
         Loader(std::string& path, CAMERA_INTRINSIC_PARAM* input);
-        Loader(std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>& poses, std::string& path, std::vector<double>& input);
+        Loader(std::string& path, std::vector<double>& input,
+                    std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>& ob_poses, 
+                        std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>& ref_poses);
         ~Loader(){}
     };
 }

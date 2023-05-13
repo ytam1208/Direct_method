@@ -32,31 +32,48 @@ void Semi_Direct::runloop(std::unique_ptr<DBLoader>& _data){
     bool show_flag = (*DB).show;
     bool first_index = false;
     int index(0);
-    Eigen::Isometry3d Tcw = Eigen::Isometry3d::Identity();
+    Eigen::Isometry3d _Twr(Eigen::Quaterniond(-0.3909, 0.8851, 0.2362, -0.0898));
+    _Twr.pretranslate(Eigen::Vector3d(1.3112, 0.8507, 1.5186));
+    poses.push_back(_Twr);
 
     for(auto frame : DB->frames){
+        Eigen::Isometry3d Tcw = Eigen::Isometry3d::Identity();
         std::cout << "*********** loop " << index << " ************" << std::endl;
         if(!Get_data(frame)) 
             continue;
-        // else if(index == 0){
-        // }
         else{
-            measurements.clear();
-            compute_gradient();
-            std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
-            try{
-                PoseEstimationDirect(Tcw);
-            }catch(std::bad_alloc& bad){
-                throw Exception("Process exception[" + this_name + "][PoseEstimationDirect] [Error code] std::bad_alloc");
-            }catch(Exception& exp){
-                throw Exception("Process exception[" + this_name + "][PoseEstimationDirect] [Error code] std::excpetion");
-            }catch(...){
-                throw Exception("Process exception[" + this_name + "][PoseEstimationDirect] [Error code] Other Exception");
+            if(index == 0){
+                prev_color = curr_color.clone();
+                prev_depth = curr_depth.clone();
+                prev_gray = curr_gray.clone();
+                compute_gradient();
+                index++;
+                continue;
             }
-            std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
-            std::chrono::duration<double> time_used = std::chrono::duration_cast<std::chrono::duration<double>> (t2-t1);
-            std::cout << "direct method costs time: " << time_used.count() << " seconds." << std::endl;
-            Display_Feature(Tcw);
+            else{
+                if(index != 1){
+                    measurements.clear();
+                    compute_gradient();
+                }
+                std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+                try{
+                    PoseEstimationDirect(Tcw);
+                }catch(std::bad_alloc& bad){
+                    throw Exception("Process exception[" + this_name + "][PoseEstimationDirect] [Error code] std::bad_alloc");
+                }catch(Exception& exp){
+                    throw Exception("Process exception[" + this_name + "][PoseEstimationDirect] [Error code] std::excpetion");
+                }catch(...){
+                    throw Exception("Process exception[" + this_name + "][PoseEstimationDirect] [Error code] Other Exception");
+                }
+                std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+                std::chrono::duration<double> time_used = std::chrono::duration_cast<std::chrono::duration<double>> (t2-t1);
+                std::cout << "direct method costs time: " << time_used.count() << " seconds." << std::endl;
+                Display_Feature(Tcw);
+
+                prev_color = curr_color.clone();
+                prev_depth = curr_depth.clone();
+                prev_gray = curr_gray.clone();
+            }
         }
         index++;
     }
@@ -77,24 +94,23 @@ inline Eigen::Vector2d Semi_Direct::project3Dto2D ( float x, float y, float z, f
 
 void Semi_Direct::compute_gradient(){
     try{
-        for(int x=10; x<curr_gray.cols-10; x++)
-            for(int y=10; y<curr_gray.rows-10; y++){
+        for(int x=10; x<prev_gray.cols-10; x++)
+            for(int y=10; y<prev_gray.rows-10; y++){
                 Eigen::Vector2d delta(
-                    curr_gray.ptr<uchar>(y)[x+1] - curr_gray.ptr<uchar>(y)[x-1], 
-                    curr_gray.ptr<uchar>(y+1)[x] - curr_gray.ptr<uchar>(y-1)[x]
+                    prev_gray.ptr<uchar>(y)[x+1] - prev_gray.ptr<uchar>(y)[x-1], 
+                    prev_gray.ptr<uchar>(y+1)[x] - prev_gray.ptr<uchar>(y-1)[x]
                 );
                 if(delta.norm() < 50)
                     continue;
                 // ushort d = curr_depth.at<ushort>(y,x);
-                ushort d = curr_depth.ptr<ushort> (y)[x];
+                ushort d = prev_depth.ptr<ushort> (y)[x];
                 if(d==0)
                     continue;
 
                 Eigen::Vector3d p3d = project2Dto3D(x, y, d, fx, fy, cx, cy, depth_scale);
-                float grayscale = float(curr_gray.ptr<uchar>(y)[x]);
+                float grayscale = float(prev_gray.ptr<uchar>(y)[x]);
                 measurements.push_back(Measurement(p3d, grayscale));
             }
-        prev_color = curr_color.clone();
     }
     catch(std::bad_alloc& e){
         throw Exception("Process exception[" + this_name + "][compute_gradient] check your input data! [Error code] std::bad_alloc");
@@ -129,7 +145,7 @@ bool Semi_Direct::PoseEstimationDirect(Eigen::Isometry3d& Tcw){
     for (Measurement m: measurements){
         EdgeSE3ProjectDirect* edge = new EdgeSE3ProjectDirect(
             m.pos_world,
-            K( 0,0 ), K( 1,1 ), K( 0,2 ), K( 1,2 ), &curr_gray
+            K(0,0), K(1,1), K(0,2), K(1,2), &curr_gray
         );
         edge->setVertex (0, pose);
         edge->setMeasurement (m.grayscale);
@@ -142,12 +158,12 @@ bool Semi_Direct::PoseEstimationDirect(Eigen::Isometry3d& Tcw){
     optimizer.optimize(100);
     Tcw = pose->estimate();
     Eigen::Isometry3d relative_pose = om.getMotion(Tcw);
-
     om.Tcw = om.addMotion(om.Tcw, relative_pose);
     poses.push_back(om.Tcw);
     
     // om.print_RT(relative_pose);
-    // om.print_RT(om.Tcw);
+    // om.print_RT(Tcw);
+    om.print_RT(om.Tcw);
     return true;
 }
 
@@ -157,7 +173,7 @@ void Semi_Direct::Display_Feature(Eigen::Isometry3d& Tcw){
             throw Exception("Process exception[" + this_name + "][Display_Feature] [Error_code] std::bad_alloc");
         cv::Mat img_show(curr_color.rows*2, curr_color.cols, CV_8UC3 );
         prev_color.copyTo(img_show(cv::Rect(0,0,curr_color.cols, curr_color.rows)));
-        curr_color.copyTo(img_show(cv::Rect(0,curr_color.rows,curr_color.cols, curr_color.rows)));
+        curr_color.copyTo(img_show(cv::Rect(0,curr_color.rows, curr_color.cols, curr_color.rows)));
 
         for(Measurement m : measurements){
             Eigen::Vector3d prev_p = m.pos_world;

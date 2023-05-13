@@ -3,14 +3,16 @@
 Pango::Loader::Loader(std::string& path, CAMERA_INTRINSIC_PARAM* input):
 this_name("Loader"),Pango_col(1024),Pango_row(768)
 {
-    Get_data(path);
-    DrawTrajectory(poses, &input);
+    // Get_data(path);
+    // DrawTrajectory(poses, &input);
 }
-Pango::Loader::Loader(std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>& poses, std::string& path, std::vector<double>& input):
+Pango::Loader::Loader(std::string& path, std::vector<double>& input,
+std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>& ob_poses, 
+std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>& ref_poses):
 this_name("Loader"),Pango_col(1024),Pango_row(768)
 {
-    Get_data(path);
-    DrawTrajectory(poses, input);
+    // Get_data(path);
+    DrawTrajectory(ob_poses, ref_poses, input);
 }
 
 bool Pango::Loader::Get_data(std::string& trajectory_file)
@@ -133,7 +135,9 @@ void Pango::Loader::DrawTrajectory(std::vector<Eigen::Isometry3d, Eigen::aligned
     // usleep(5000);   // sleep 5 ms
   }
 }
-void Pango::Loader::DrawTrajectory(std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>& poses, std::vector<double>& input){
+void Pango::Loader::DrawTrajectory(std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>& ob_poses, 
+                                    std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>& ref_poses, 
+                                      std::vector<double>& input){
   // create pangolin window and plot the trajectory
   pangolin::CreateWindowAndBind("Trajectory Viewer", 1024, 768);
   glEnable(GL_DEPTH_TEST);
@@ -159,8 +163,8 @@ void Pango::Loader::DrawTrajectory(std::vector<Eigen::Isometry3d, Eigen::aligned
   pangolin::Var<int> Other("ui.Other_node", 1, 2, 10);  
   pangolin::Var<bool> Reference_checkbox("ui.Reference",false,true);
   pangolin::Var<bool> Cam_View_reset("ui.View_reset",false,true);
-  std::cout << "DrawTrajectory! Ground_Poses size = " << this->poses.size() << std::endl;
-  std::cout << "DrawTrajectory! Data_Poses size = " << poses.size() << std::endl;
+  std::cout << "DrawTrajectory! Ground_Poses size = " << ref_poses.size() << std::endl;
+  std::cout << "DrawTrajectory! Obser_Poses size = " << ob_poses.size() << std::endl;
   int count = 0;
   while (pangolin::ShouldQuit() == false) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -177,40 +181,40 @@ void Pango::Loader::DrawTrajectory(std::vector<Eigen::Isometry3d, Eigen::aligned
     if(Start_checkbox){
       if(Reference_checkbox){
         glLineWidth(Other);
-        for (size_t i = 0; i < this->poses.size(); i++)
-          DrawNode(this->poses, i, 0.01);
+        for (size_t i = 0; i < ref_poses.size(); i++)
+          DrawNode(ref_poses, i, 0.01);
       }
         
-      if(count > poses.size()-1) count = 0;
+      if(count > ob_poses.size()-1) count = 0;
 
       glLineWidth(Ober);
-      DrawNode(poses, count, 0.1);
+      DrawNode(ob_poses, count, 0.01);
       count++;
-    };
+    }
     glLineWidth(First);
-    DrawNode(this->poses, 0, 0.01);
+    DrawNode(ref_poses, 0, 0.01);
 
     glLineWidth(Last);
-    DrawNode(this->poses, this->poses.size()-1, 0.01);
+    DrawNode(ref_poses, ref_poses.size()-1, 0.01);
 
     glLineWidth(1);
-    for(size_t i = 0; i < this->poses.size(); i++){
+    for(size_t i = 0; i < ref_poses.size(); i++){
       glBegin(GL_LINES);
       glColor3f(1.0f-(float)Back_G, 1.0f-(float)Back_G, 1.0f-(float)Back_G);
       // auto p1;
-      if(i < this->poses.size()-1){
-        auto p1 = this->poses[i], p2 = this->poses[i+1];
+      if(i < ref_poses.size()-1){
+        auto p1 = ref_poses[i], p2 = ref_poses[i+1];
         glVertex3d(p1.translation()[0], p1.translation()[1], p1.translation()[2]);
         glVertex3d(p2.translation()[0], p2.translation()[1], p2.translation()[2]);
       }
       else{
-          auto p1 = this->poses[0], p2 = this->poses[this->poses.size()-1];
+          auto p1 = ref_poses[0], p2 = ref_poses[ref_poses.size()-1];
           glVertex3d(p1.translation()[0], p1.translation()[1], p1.translation()[2]);
           glVertex3d(p2.translation()[0], p2.translation()[1], p2.translation()[2]);
       }
       glEnd();
     }
     pangolin::FinishFrame();
-    // usleep(50000);   // sleep 5 ms
+    usleep(5000);   // sleep 5 ms
   }
 }
