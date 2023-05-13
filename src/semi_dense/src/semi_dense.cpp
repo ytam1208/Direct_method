@@ -32,9 +32,9 @@ void Semi_Direct::runloop(std::unique_ptr<DBLoader>& _data){
     bool show_flag = (*DB).show;
     bool first_index = false;
     int index(0);
-    Eigen::Isometry3d _Twr(Eigen::Quaterniond(-0.3909, 0.8851, 0.2362, -0.0898));
-    _Twr.pretranslate(Eigen::Vector3d(1.3112, 0.8507, 1.5186));
-    poses.push_back(_Twr);
+    // Eigen::Isometry3d _Twr(Eigen::Quaterniond(-0.3909, 0.8851, 0.2362, -0.0898));
+    // _Twr.pretranslate(Eigen::Vector3d(1.3112, 0.8507, 1.5186));
+    // poses.push_back(_Twr);
 
     for(auto frame : DB->frames){
         Eigen::Isometry3d Tcw = Eigen::Isometry3d::Identity();
@@ -68,7 +68,7 @@ void Semi_Direct::runloop(std::unique_ptr<DBLoader>& _data){
                 std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
                 std::chrono::duration<double> time_used = std::chrono::duration_cast<std::chrono::duration<double>> (t2-t1);
                 std::cout << "direct method costs time: " << time_used.count() << " seconds." << std::endl;
-                Display_Feature(Tcw);
+                // Display_Feature(Tcw);
 
                 prev_color = curr_color.clone();
                 prev_depth = curr_depth.clone();
@@ -155,14 +155,17 @@ bool Semi_Direct::PoseEstimationDirect(Eigen::Isometry3d& Tcw){
     }    
     // std::cout << "edges in graph: "<<optimizer.edges().size() << std::endl;
     optimizer.initializeOptimization();
-    optimizer.optimize(100);
+    optimizer.optimize(30);
     Tcw = pose->estimate();
+
     Eigen::Isometry3d relative_pose = om.getMotion(Tcw);
-    om.Tcw = om.addMotion(om.Tcw, relative_pose);
+    om.Tcw = om.addMotion(om.Tcw, Tcw);
+    // om.Tcw = om.inverse_addMotion(om.Tcw, Tcw);
+
     poses.push_back(om.Tcw);
     
     // om.print_RT(relative_pose);
-    // om.print_RT(Tcw);
+    om.print_RT(Tcw);
     om.print_RT(om.Tcw);
     return true;
 }
@@ -197,7 +200,7 @@ void Semi_Direct::Display_Feature(Eigen::Isometry3d& Tcw){
         cv::putText(img_show, "Prev", cv::Point(10,20), 1, 1, cv::Scalar(0,0,255), 2, 8);
         cv::putText(img_show, "Current", cv::Point(10,20+curr_color.rows), 1, 1, cv::Scalar(0,0,255), 2, 8);
         cv::imshow("Result", img_show);
-        cv::waitKey(0);
+        cv::waitKey(1);
     }
     catch(std::bad_alloc& e){
         throw Exception("Process exception[" + this_name + "][Display_Feature] check your input data! [Error code] std::bad_alloc");

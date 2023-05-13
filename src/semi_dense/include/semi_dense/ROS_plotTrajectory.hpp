@@ -35,6 +35,10 @@ public:
                 tmp.transform.translation.x = poses[i].translation()(0);
                 tmp.transform.translation.y = poses[i].translation()(1);
                 tmp.transform.translation.z = poses[i].translation()(2);
+
+                // tmp.transform.translation.x = tmp.transform.translation.x + i;
+                tmp.transform.translation.z = 0.0;
+
                 tf_list.transforms.push_back(tmp);
             }   
         }

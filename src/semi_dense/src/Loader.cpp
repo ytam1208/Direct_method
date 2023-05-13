@@ -2,14 +2,17 @@
 
 void DBLoader::Get_ground_data(const std::string& ground_path){
     std::ifstream fin_G(ground_path);
+    int cnt = 0;
     if(fin_G.is_open()){
       try{
         while(!fin_G.eof()){
+            if(cnt == 100) break;
             float time, tx, ty, tz, qx, qy, qz, qw;
             fin_G >> time >> tx >> ty >> tz >> qx >> qy >> qz >> qw;
             Eigen::Isometry3d Twr(Eigen::Quaterniond(qw, qx, qy, qz));
             Twr.pretranslate(Eigen::Vector3d(tx, ty, tz));
             poses.push_back(Twr);
+            cnt++;
         }
       }
       catch(...){
@@ -46,9 +49,11 @@ void DBLoader::Get_Image_data(const std::string& ass_path, const std::string& lo
     cv::Mat color, depth, gray;
     DF frame;
     std::ifstream fin(ass_path);
+    int cnt = 0;
     if(fin.is_open()){
         try{
             while(!fin.eof()){
+                if(cnt == 100) break;
                 fin >> time_rgb >> rgb_file >> time_depth >> depth_file;
                 frame.color = cv::imread(local_path + rgb_file);
                 frame.depth = cv::imread(local_path + depth_file, -1);
@@ -56,6 +61,7 @@ void DBLoader::Get_Image_data(const std::string& ass_path, const std::string& lo
                     continue; 
                 cv::cvtColor (frame.color, frame.gray, cv::COLOR_BGR2GRAY);
                 frames.push_back(frame);
+                cnt++;
             }
             fin.close();
         }

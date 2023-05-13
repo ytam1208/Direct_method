@@ -40,12 +40,15 @@
 #include "semi_dense/plotTrajectory.hpp"
 #include "semi_dense/ROS_plotTrajectory.hpp"
 
-// #define __ROS__
-#define __View_Pangoline__
+#define __ROS__
+// #define __View_Pangoline__
 int main(int argc, char** argv)
 {
     std::vector<double> cam_intrinsic = {325.5, 253.5, 518.0, 519.0, 1000.0};   //desk
     std::string local_path = "/home/cona/Direct_method/data/";
+
+    // std::vector<double> cam_intrinsic = {319.5, 239.5, 525.0, 525.0, 1000.0};   //desk
+    // std::string local_path = "/home/cona/rgbd_dataset_freiburg1_xyz/";
     std::string ground_truth = local_path + "test_groundtruth.txt";
     std::string associate_path = local_path + "associate.txt";
 
@@ -81,9 +84,10 @@ int main(int argc, char** argv)
             tf2_msgs::TFMessage tf_list1, tf_list2;
 
             vd("GT", mc->poses, tf_list1);
-            vd("Ob", sd.poses[idx], idx, tf_list2);
+            // vd("Ob", sd.poses[idx], idx, tf_list2);
+            vd("Ob", sd.poses, tf_list2);
 
-            // tf_gt_pub.publish(tf_list1);
+            tf_gt_pub.publish(tf_list1);
             tf_ob_pub.publish(tf_list2);
 
             idx++;

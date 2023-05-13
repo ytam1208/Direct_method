@@ -32,7 +32,7 @@ protected:
     inline float getPixelValue (float x, float y);
 public:
     Eigen::Vector3d x_world_;   // 3D point in world frame
-    float cx_=0, cy_=0, fx_=0, fy_=0; // Camera intrinsics
+    float cx_=0.0f, cy_=0.0f, fx_=0.0f, fy_=0.0f; // Camera intrinsics
     cv::Mat* image_=nullptr;    // reference image
 };
 
