@@ -25,6 +25,7 @@
 #include "semi_dense/param.hpp"
 
 typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::PointCloud2> MySyncPolicy;
+
 namespace SYNC
 {
     class CALLBACK : public GET_PARAM
@@ -37,6 +38,7 @@ namespace SYNC
 
         private:
             ros::NodeHandle nh;
+            ros::Subscriber Image_info_sub;
             message_filters::Subscriber<sensor_msgs::Image> Color_image_sub;
             message_filters::Subscriber<sensor_msgs::Image> Depth_image_sub;
             message_filters::Subscriber<sensor_msgs::PointCloud2> Depth_point_sub;
@@ -44,6 +46,7 @@ namespace SYNC
             message_filters::Synchronizer<MySyncPolicy> sync;
 
         public:
+            void Camera_Info_callback(const sensor_msgs::CameraInfo& msg);
             void Convert_Pcl2_to_XYZ(const sensor_msgs::PointCloud2ConstPtr& Input_img); 
             cv_bridge::CvImagePtr Convert_Pcl2_to_Image(const sensor_msgs::PointCloud2ConstPtr& Input_img); 
             cv_bridge::CvImagePtr Convert_Image(const sensor_msgs::ImageConstPtr& Input_img); 

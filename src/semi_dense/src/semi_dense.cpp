@@ -1,6 +1,6 @@
 #include "semi_dense/semi_dense.hpp"
 
-Semi_Direct::Semi_Direct(std::vector<double>& c_i, std::unique_ptr<DBLoader>& data):
+Semi_Direct::Semi_Direct(std::vector<double>& c_i, std::unique_ptr<DBLoader>& data, Eigen::Isometry3d& _Tcw):
 this_name("Semi_Direct"), idx(0){
     cx = c_i[0];
     cy = c_i[1];
@@ -11,6 +11,7 @@ this_name("Semi_Direct"), idx(0){
     K << fx,  0.f, cx,
         0.f,  fy,  cy,
         0.f, 0.f, 1.0f;
+    om.Tcw = _Tcw;
 }
 
 bool Semi_Direct::Get_data(DF& _data){
@@ -34,7 +35,7 @@ void Semi_Direct::runloop(std::unique_ptr<DBLoader>& _data){
     int index(0);
     // Eigen::Isometry3d _Twr(Eigen::Quaterniond(-0.3909, 0.8851, 0.2362, -0.0898));
     // _Twr.pretranslate(Eigen::Vector3d(1.3112, 0.8507, 1.5186));
-    // poses.push_back(_Twr);
+    poses.push_back(om.Tcw);
 
     for(auto frame : DB->frames){
         Eigen::Isometry3d Tcw = Eigen::Isometry3d::Identity();
@@ -68,7 +69,7 @@ void Semi_Direct::runloop(std::unique_ptr<DBLoader>& _data){
                 std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
                 std::chrono::duration<double> time_used = std::chrono::duration_cast<std::chrono::duration<double>> (t2-t1);
                 std::cout << "direct method costs time: " << time_used.count() << " seconds." << std::endl;
-                // Display_Feature(Tcw);
+                Display_Feature(Tcw);
 
                 prev_color = curr_color.clone();
                 prev_depth = curr_depth.clone();
@@ -103,7 +104,7 @@ void Semi_Direct::compute_gradient(){
                 if(delta.norm() < 50)
                     continue;
                 // ushort d = curr_depth.at<ushort>(y,x);
-                ushort d = prev_depth.ptr<ushort> (y)[x];
+                ushort d = prev_depth.ptr<ushort>(y)[x];
                 if(d==0)
                     continue;
 
@@ -134,7 +135,7 @@ bool Semi_Direct::PoseEstimationDirect(Eigen::Isometry3d& Tcw){
 
     g2o::SparseOptimizer optimizer;
     optimizer.setAlgorithm(solver);
-    optimizer.setVerbose(true);
+    // optimizer.setVerbose(true);
 
     g2o::VertexSE3Expmap* pose = new g2o::VertexSE3Expmap();
     pose->setEstimate (g2o::SE3Quat(Tcw.rotation(), Tcw.translation()));
@@ -158,15 +159,12 @@ bool Semi_Direct::PoseEstimationDirect(Eigen::Isometry3d& Tcw){
     optimizer.optimize(30);
     Tcw = pose->estimate();
 
-    Eigen::Isometry3d relative_pose = om.getMotion(Tcw);
-    om.Tcw = om.addMotion(om.Tcw, Tcw);
-    // om.Tcw = om.inverse_addMotion(om.Tcw, Tcw);
-
-    poses.push_back(om.Tcw);
-    
-    // om.print_RT(relative_pose);
+    // Eigen::Isometry3d relative_pose = om.getMotion(Tcw);
+    Eigen::Isometry3d Update_odom = om.addMotion(om.Tcw, Tcw);
+    om.Tcw = Update_odom;
     om.print_RT(Tcw);
-    om.print_RT(om.Tcw);
+    // om.print_RT(om.Tcw);
+    poses.push_back(om.Tcw);   
     return true;
 }
 
@@ -183,7 +181,7 @@ void Semi_Direct::Display_Feature(Eigen::Isometry3d& Tcw){
             Eigen::Vector2d pixel_prev = project3Dto2D (prev_p(0,0), prev_p(1,0), prev_p(2,0), fx, fy, cx, cy);
             Eigen::Vector3d curr_p = Tcw*m.pos_world;
             Eigen::Vector2d pixel_curr = project3Dto2D (curr_p(0,0), curr_p(1,0), curr_p(2,0), fx, fy, cx, cy);
-            if (pixel_curr(0,0) < 0 || pixel_curr(0,0) >= curr_color.cols || pixel_curr(1,0) <0 || pixel_curr(1,0) >= curr_color.rows)
+            if(pixel_curr(0,0) < 0 || pixel_curr(0,0) >= curr_color.cols || pixel_curr(1,0) <0 || pixel_curr(1,0) >= curr_color.rows)
                 continue;
 
             img_show.ptr<uchar>(pixel_prev(1,0))[int(pixel_prev(0,0))*3] = 0;
@@ -194,13 +192,13 @@ void Semi_Direct::Display_Feature(Eigen::Isometry3d& Tcw){
             img_show.ptr<uchar>(pixel_curr(1,0)+curr_color.rows)[int(pixel_curr(0,0))*3+1] = 250;
             img_show.ptr<uchar>(pixel_curr(1,0)+curr_color.rows)[int(pixel_curr(0,0))*3+2] = 0;
 
-            cv::circle (img_show, cv::Point2d (pixel_prev(0,0), pixel_prev(1,0)), 2, cv::Scalar(0,250,0), 2);
-            cv::circle (img_show, cv::Point2d (pixel_curr(0,0), pixel_curr(1,0)+curr_color.rows), 2, cv::Scalar(0,250,255), 2);
+            cv::circle(img_show, cv::Point2d (pixel_prev(0,0), pixel_prev(1,0)), 1, cv::Scalar(0,250,0), -1);
+            cv::circle(img_show, cv::Point2d (pixel_curr(0,0), pixel_curr(1,0)+curr_color.rows), 1, cv::Scalar(0,250,255), -1);
         }
         cv::putText(img_show, "Prev", cv::Point(10,20), 1, 1, cv::Scalar(0,0,255), 2, 8);
         cv::putText(img_show, "Current", cv::Point(10,20+curr_color.rows), 1, 1, cv::Scalar(0,0,255), 2, 8);
         cv::imshow("Result", img_show);
-        cv::waitKey(1);
+        cv::waitKey(0);
     }
     catch(std::bad_alloc& e){
         throw Exception("Process exception[" + this_name + "][Display_Feature] check your input data! [Error code] std::bad_alloc");

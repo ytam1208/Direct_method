@@ -50,34 +50,6 @@ public:
             throw Exception("Process exception[" + this_name + "][Motion to ROS operator] [Error code] Other exception");
         }
     }
-    void operator()(const std::string& tf_name, 
-    Eigen::Isometry3d& poses, int idx,
-    tf2_msgs::TFMessage& tf_list){
-        try{
-            Eigen::Quaterniond quat(poses.rotation());
-            std::string name = tf_name;
-            geometry_msgs::TransformStamped tmp;
-            tmp.header.stamp = ros::Time::now();
-            tmp.header.frame_id = "map";
-            tmp.child_frame_id = name + std::to_string(idx);
 
-            tmp.transform.rotation.w = quat.w();
-            tmp.transform.rotation.x = quat.x();
-            tmp.transform.rotation.y = quat.y();
-            tmp.transform.rotation.z = quat.z();
-
-            tmp.transform.translation.x = poses.translation()(0);
-            tmp.transform.translation.y = poses.translation()(1);
-            tmp.transform.translation.z = poses.translation()(2);
-            // tf_list.transforms.push_back(tmp);
-        }
-        catch(std::bad_alloc& bad){
-            throw Exception("Process exception[" + this_name + "][Motion to ROS operator] [Error code] std::bad_alloc");
-        }catch(Exception e){
-            throw Exception("Process exception[" + this_name + "][Motion to ROS operator] [Error code] std::exception");
-        }catch(...){
-            throw Exception("Process exception[" + this_name + "][Motion to ROS operator] [Error code] Other exception");
-        }
-    }
     Viewer():this_name("Viewer"){}
 };

@@ -6,7 +6,7 @@ void DBLoader::Get_ground_data(const std::string& ground_path){
     if(fin_G.is_open()){
       try{
         while(!fin_G.eof()){
-            if(cnt == 100) break;
+            if(cnt > 100) break;
             float time, tx, ty, tz, qx, qy, qz, qw;
             fin_G >> time >> tx >> ty >> tz >> qx >> qy >> qz >> qw;
             Eigen::Isometry3d Twr(Eigen::Quaterniond(qw, qx, qy, qz));
@@ -32,7 +32,7 @@ void DBLoader::Get_Image_data(const int img_cnt){
     cv::Mat color, depth, gray;
     DF frame;
     frames.reserve(img_cnt);
-    std::ifstream fin ( associate_file );
+    std::ifstream fin(associate_file);
     for(int index = 0; index < img_cnt; index++){
         fin >> time_rgb >> rgb_file >> time_depth >> depth_file;
         frame.color = cv::imread(path_to_dataset + "/" + rgb_file);
@@ -53,7 +53,7 @@ void DBLoader::Get_Image_data(const std::string& ass_path, const std::string& lo
     if(fin.is_open()){
         try{
             while(!fin.eof()){
-                if(cnt == 100) break;
+                if(cnt > 100) break;
                 fin >> time_rgb >> rgb_file >> time_depth >> depth_file;
                 frame.color = cv::imread(local_path + rgb_file);
                 frame.depth = cv::imread(local_path + depth_file, -1);

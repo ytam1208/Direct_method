@@ -5,8 +5,20 @@ SYNC::CALLBACK::CALLBACK(ros::NodeHandle* _nh):
     Color_image_sub(nh, "/camera/rgb/image_color", 1),
     Depth_image_sub(nh, "/camera/depth/image", 1),
     Depth_point_sub(nh, "/camera/depth/points", 1),
-    sync(MySyncPolicy(1000), Color_image_sub, Depth_image_sub, Depth_point_sub){
+    sync(MySyncPolicy(10), Color_image_sub, Depth_image_sub, Depth_point_sub){
+        Image_info_sub = nh.subscribe("/camera/rgb/camera_info", 1, &SYNC::CALLBACK::Camera_Info_callback, this),
         sync.registerCallback(boost::bind(&SYNC::CALLBACK::Synchronize, this, _1, _2, _3));
+}
+
+void SYNC::CALLBACK::Camera_Info_callback(const sensor_msgs::CameraInfo& msg){
+    cv::Mat intrK(3, 3, CV_64FC1, (void*)msg.K.data());
+    std::cout << intrK << std::endl;
+    intrK[0][0] = fx;
+    intrK[0][2] = cx;
+    intrK[1][1] = fy;
+    intrK[1][2] = cy;
+    depth_scale = 1000.0f;
+    Image_info_sub.shutdown();
 }
 
 void SYNC::CALLBACK::Convert_Pcl2_to_XYZ(const sensor_msgs::PointCloud2ConstPtr& Input_img){

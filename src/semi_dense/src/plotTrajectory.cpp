@@ -3,7 +3,6 @@
 Pango::Loader::Loader(std::string& path, CAMERA_INTRINSIC_PARAM* input):
 this_name("Loader"),Pango_col(1024),Pango_row(768)
 {
-    // Get_data(path);
     // DrawTrajectory(poses, &input);
 }
 Pango::Loader::Loader(std::string& path, std::vector<double>& input,
@@ -11,33 +10,7 @@ std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>& ob_
 std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>& ref_poses):
 this_name("Loader"),Pango_col(1024),Pango_row(768)
 {
-    // Get_data(path);
     DrawTrajectory(ob_poses, ref_poses, input);
-}
-
-bool Pango::Loader::Get_data(std::string& trajectory_file)
-{
-    std::ifstream fin_G(trajectory_file);
-    if(fin_G.is_open()){
-      int cnt = 0;
-      try{
-        while(!fin_G.eof()){
-            float time, tx, ty, tz, qx, qy, qz, qw;
-            fin_G >> time >> tx >> ty >> tz >> qx >> qy >> qz >> qw;
-            Eigen::Isometry3d Twr(Eigen::Quaterniond(qw, qx, qy, qz));
-            Twr.pretranslate(Eigen::Vector3d(tx, ty, tz));
-            poses.push_back(Twr);
-        }
-        fin_G.close();
-      }
-      catch(...){
-        fin_G.close();
-        throw Exception("Process exception[" + this_name + "][Get_data] check your input data! [Error code] std::bad_alloc");
-      }
-    }
-    else
-        throw Exception("Process exception[" + this_name + "][Get_data] File not found");  
-    return 0;
 }
 
 void Pango::Loader::DrawNode(std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>& poses, int i, float scale)

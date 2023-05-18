@@ -47,7 +47,7 @@ class Semi_Direct: public CAMERA_INTRINSIC_PARAM
         bool Get_data(DF& _data);
         void runloop(std::unique_ptr<DBLoader>& _data);
     public:
-        Semi_Direct(std::vector<double>& c_i, std::unique_ptr<DBLoader>& data);
+        Semi_Direct(std::vector<double>& c_i, std::unique_ptr<DBLoader>& data, Eigen::Isometry3d& _Tcw);
         ~Semi_Direct(){};
 };
 

@@ -45,22 +45,20 @@
 int main(int argc, char** argv)
 {
     std::vector<double> cam_intrinsic = {325.5, 253.5, 518.0, 519.0, 1000.0};   //desk
+    // std::vector<double> cam_intrinsic = {319.5, 239.5, 525.0, 525.0, 1000.0};   //floor
+    // std::string local_path = "/home/cona/rgbd_dataset_freiburg1_floor/";
     std::string local_path = "/home/cona/Direct_method/data/";
-
-    // std::vector<double> cam_intrinsic = {319.5, 239.5, 525.0, 525.0, 1000.0};   //desk
-    // std::string local_path = "/home/cona/rgbd_dataset_freiburg1_xyz/";
     std::string ground_truth = local_path + "test_groundtruth.txt";
     std::string associate_path = local_path + "associate.txt";
 
     std::unique_ptr<DBLoader> mc = std::make_unique<DBLoader>(local_path, ground_truth, associate_path);        
-    // std::vector<double> cam_intrinsic = {319.5, 239.5, 525.0, 525.0, 1000.0};   //pioneer
-    // std::unique_ptr<DBLoader> mc = std::make_unique<DBLoader>("/home/cona/rgbd_dataset_freiburg2_pioneer_slam3/");
     mc->show = 1;
 
 #ifdef __ROS__   
     ros::init(argc, argv, "semi_dense_node");
 	// ros::NodeHandle nh("~");
     ros::NodeHandle nh1;
+    SYNC::CALLBACK cb(&nh1);
     ros::Publisher tf_gt_pub = nh1.advertise<tf2_msgs::TFMessage>("tf", 1);
     ros::Publisher tf_ob_pub = nh1.advertise<tf2_msgs::TFMessage>("tf", 1);
     // XmlRpc::XmlRpcValue* camera_intrinsic = new XmlRpc::XmlRpcValue;
@@ -68,29 +66,23 @@ int main(int argc, char** argv)
     // nh.getParam("/CAMERA_INTRINSIC_PARAM", *camera_intrinsic);
 #endif
     try{
-        Semi_Direct sd(cam_intrinsic, mc);    
+        Semi_Direct sd(cam_intrinsic, mc, mc->poses[0]);    
         sd.runloop(mc);
 #ifdef __View_Pangoline__
-        // std::string path = "/home/cona/Direct_method/data/freiburg1_xyz.txt";
         Pango::Loader ld(ground_truth, cam_intrinsic, sd.poses, mc->poses);
 #endif
 #if defined(__ROS__) && !defined(__View_Pangoline__)
         ros::Rate rate(30);
         Viewer vd;
 
-        int idx = 0;
-        int Max_size = sd.poses.size();
         while(ros::ok()){
             tf2_msgs::TFMessage tf_list1, tf_list2;
-
             vd("GT", mc->poses, tf_list1);
-            // vd("Ob", sd.poses[idx], idx, tf_list2);
             vd("Ob", sd.poses, tf_list2);
 
             tf_gt_pub.publish(tf_list1);
             tf_ob_pub.publish(tf_list2);
 
-            idx++;
             ros::spinOnce();
             rate.sleep();
         }
