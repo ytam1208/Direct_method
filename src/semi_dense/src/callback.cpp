@@ -2,22 +2,55 @@
 
 SYNC::CALLBACK::CALLBACK(ros::NodeHandle* _nh):
     nh(*_nh),
-    Color_image_sub(nh, "/camera/rgb/image_color", 1),
+    LColor_image_sub(nh, "/pylon/left/image_raw", 1),
+    RColor_image_sub(nh, "/pylon/right/image_raw", 1),
     Depth_image_sub(nh, "/camera/depth/image", 1),
     Depth_point_sub(nh, "/camera/depth/points", 1),
-    sync(MySyncPolicy(10), Color_image_sub, Depth_image_sub, Depth_point_sub){
-        Image_info_sub = nh.subscribe("/camera/rgb/camera_info", 1, &SYNC::CALLBACK::Camera_Info_callback, this),
-        sync.registerCallback(boost::bind(&SYNC::CALLBACK::Synchronize, this, _1, _2, _3));
+    sync(MySyncPolicy(10), LColor_image_sub, RColor_image_sub){
+        Camera_info_r = nh.advertise<sensor_msgs::CameraInfo>("/pylon/right/camera_info", 1);
+        Camera_info_l = nh.advertise<sensor_msgs::CameraInfo>("/pylon/left/camera_info", 1);
+       
+        Image_info_sub = nh.subscribe("/camera_info", 1, &SYNC::CALLBACK::Camera_Info_callback, this),
+        sync.registerCallback(boost::bind(&SYNC::CALLBACK::Synchronize, this, _1, _2));
+
+        Camera_Info_pub();
 }
 
-void SYNC::CALLBACK::Camera_Info_callback(const sensor_msgs::CameraInfo& msg){
-    cv::Mat intrK(3, 3, CV_64FC1, (void*)msg.K.data());
-    std::cout << intrK << std::endl;
-    intrK[0][0] = fx;
-    intrK[0][2] = cx;
-    intrK[1][1] = fy;
-    intrK[1][2] = cy;
+void SYNC::CALLBACK::Camera_Info_pub(){
+    thread_list.push_back(std::move(std::thread([this](){
+        ros::Rate rate(0.5);
+        sensor_msgs::CameraInfo info_camera;
+        while(ros::ok()){
+            info_camera.header.stamp = ros::Time::now();
+            info_camera.K.assign(0.0);
+            info_camera.K[0] = 1155.4288024742;
+            info_camera.K[2] = 927.60066037599;
+            info_camera.K[4] = 1155.4857727463;
+            info_camera.K[5] = 569.32829231548;
+            Camera_info_r.publish(info_camera);
+            Camera_info_l.publish(info_camera);
+            ros::spinOnce();
+            rate.sleep();
+        }
+    })));
+    thread_list.push_back(std::move(std::thread([this](){
+        ros::Rate rate(160);
+        sensor_msgs::CameraInfo info_camera;
+        while(ros::ok()){
+            
+            ros::spinOnce();
+            rate.sleep();
+        }
+    })));
+}
+
+void SYNC::CALLBACK::Camera_Info_callback(const sensor_msgs::CameraInfoConstPtr& msg){
+    fx = msg->K[0];
+    cx = msg->K[2];
+    fy = msg->K[4];
+    cy = msg->K[5];
     depth_scale = 1000.0f;
+    ROS_INFO("Load Camera Info[fx = %lf][fy = %lf][cx = %lf][cy = %lf]", fx, fy, cx, cy);
     Image_info_sub.shutdown();
 }
 
@@ -90,17 +123,19 @@ cv_bridge::CvImagePtr SYNC::CALLBACK::Convert_Image(const sensor_msgs::Image& In
     }    
 }
 
-void SYNC::CALLBACK::Synchronize(const sensor_msgs::ImageConstPtr& c_image, 
-                                    const sensor_msgs::ImageConstPtr& d_image, 
-                                        const sensor_msgs::PointCloud2ConstPtr& d_points){
-    cv_bridge::CvImagePtr c_imgPtr = Convert_Image(c_image);
-    cv_bridge::CvImagePtr d_imgPtr = Convert_Image(d_image);
-    Convert_Pcl2_to_XYZ(d_points);
+void SYNC::CALLBACK::Synchronize(const sensor_msgs::ImageConstPtr& l_image, 
+                                    const sensor_msgs::ImageConstPtr& r_image){
+    cv_bridge::CvImagePtr l_imgPtr = Convert_Image(l_image);
+    cv_bridge::CvImagePtr r_imgPtr = Convert_Image(r_image);
 
-    if(!c_imgPtr->image.empty() && !d_imgPtr->image.empty()){
-        Curr_C_mat = c_imgPtr->image.clone();
-        Curr_D_mat = d_imgPtr->image.clone();
-        // Curr_Dp_mat = dp_imgPtr->image.clone();
+    if(!l_imgPtr->image.empty() && !r_imgPtr->image.empty()){
+        // Curr_L_mat = l_imgPtr->image.clone();
+        // Curr_R_mat = r_imgPtr->image.clone();
+
+        cv::resize( l_imgPtr->image, Curr_L_mat, cv::Size( 640, 480 ), 0, 0, CV_INTER_NN );
+        cv::resize( r_imgPtr->image, Curr_R_mat, cv::Size( 640, 480 ), 0, 0, CV_INTER_NN );
+
+        Curr_D_mat = DM.test(Curr_L_mat, Curr_R_mat);
     }
     else
         ROS_INFO("No data");

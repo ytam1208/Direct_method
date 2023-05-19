@@ -44,48 +44,39 @@
 // #define __View_Pangoline__
 int main(int argc, char** argv)
 {
-    std::vector<double> cam_intrinsic = {325.5, 253.5, 518.0, 519.0, 1000.0};   //desk
-    // std::vector<double> cam_intrinsic = {319.5, 239.5, 525.0, 525.0, 1000.0};   //floor
-    // std::string local_path = "/home/cona/rgbd_dataset_freiburg1_floor/";
-    std::string local_path = "/home/cona/Direct_method/data/";
-    std::string ground_truth = local_path + "test_groundtruth.txt";
-    std::string associate_path = local_path + "associate.txt";
-
-    std::unique_ptr<DBLoader> mc = std::make_unique<DBLoader>(local_path, ground_truth, associate_path);        
-    mc->show = 1;
-
 #ifdef __ROS__   
     ros::init(argc, argv, "semi_dense_node");
 	// ros::NodeHandle nh("~");
     ros::NodeHandle nh1;
+
     SYNC::CALLBACK cb(&nh1);
-    ros::Publisher tf_gt_pub = nh1.advertise<tf2_msgs::TFMessage>("tf", 1);
-    ros::Publisher tf_ob_pub = nh1.advertise<tf2_msgs::TFMessage>("tf", 1);
+    // ros::Publisher tf_gt_pub = nh1.advertise<tf2_msgs::TFMessage>("tf", 1);
+    // ros::Publisher tf_ob_pub = nh1.advertise<tf2_msgs::TFMessage>("tf", 1);
     // XmlRpc::XmlRpcValue* camera_intrinsic = new XmlRpc::XmlRpcValue;
     // nh.getParam("/Set_Display", mc->show);
     // nh.getParam("/CAMERA_INTRINSIC_PARAM", *camera_intrinsic);
 #endif
     try{
-        Semi_Direct sd(cam_intrinsic, mc, mc->poses[0]);    
-        sd.runloop(mc);
+        // Semi_Direct sd(cam_intrinsic, mc, mc->poses[0]);    
+        // sd.runloop(mc);
 #ifdef __View_Pangoline__
         Pango::Loader ld(ground_truth, cam_intrinsic, sd.poses, mc->poses);
 #endif
 #if defined(__ROS__) && !defined(__View_Pangoline__)
-        ros::Rate rate(30);
-        Viewer vd;
+        // ros::Rate rate(30);
+        // Viewer vd;
 
-        while(ros::ok()){
-            tf2_msgs::TFMessage tf_list1, tf_list2;
-            vd("GT", mc->poses, tf_list1);
-            vd("Ob", sd.poses, tf_list2);
+        // while(ros::ok()){
+        //     tf2_msgs::TFMessage tf_list1, tf_list2;
+        //     vd("GT", mc->poses, tf_list1);
+        //     vd("Ob", sd.poses, tf_list2);
 
-            tf_gt_pub.publish(tf_list1);
-            tf_ob_pub.publish(tf_list2);
+        //     tf_gt_pub.publish(tf_list1);             
+        //     tf_ob_pub.publish(tf_list2);
 
-            ros::spinOnce();
-            rate.sleep();
-        }
+        //     ros::spinOnce();
+        //     rate.sleep();
+        // }
 #endif
     }
     catch(Exception& e){

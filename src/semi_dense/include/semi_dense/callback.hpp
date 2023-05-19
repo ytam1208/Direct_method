@@ -23,42 +23,49 @@
 
 #include <thread>
 #include "semi_dense/param.hpp"
+#include "semi_dense/disparity.hpp"
 
-typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::PointCloud2> MySyncPolicy;
+typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> MySyncPolicy;
 
 namespace SYNC
 {
     class CALLBACK : public GET_PARAM
     {
         public:
-            cv::Mat Curr_D_mat;     //astra_camera/depth/image_raw
-            cv::Mat Curr_Dp_mat;    //astra_camera/depth/points
-            cv::Mat Curr_C_mat;     //astra_camera/color/image_raw
+            cv::Mat Curr_D_mat;     //depth/image_raw
+            cv::Mat Curr_Dp_mat;    //depth/points
+            cv::Mat Curr_R_mat;     //right/color/image_raw
+            cv::Mat Curr_L_mat;     //left/color/image_raw  
+         
             std::vector<cv::Point3f> Depth_pt_v;
-
+            std::vector<std::thread> thread_list;
         private:
             ros::NodeHandle nh;
             ros::Subscriber Image_info_sub;
-            message_filters::Subscriber<sensor_msgs::Image> Color_image_sub;
+            ros::Publisher Camera_info_r, Camera_info_l;
+            message_filters::Subscriber<sensor_msgs::Image> LColor_image_sub, RColor_image_sub;
             message_filters::Subscriber<sensor_msgs::Image> Depth_image_sub;
             message_filters::Subscriber<sensor_msgs::PointCloud2> Depth_point_sub;
             
             message_filters::Synchronizer<MySyncPolicy> sync;
-
+            Depth_Map DM;
         public:
-            void Camera_Info_callback(const sensor_msgs::CameraInfo& msg);
+            void Camera_Info_pub();
+            void Camera_Info_callback(const sensor_msgs::CameraInfoConstPtr& msg);
             void Convert_Pcl2_to_XYZ(const sensor_msgs::PointCloud2ConstPtr& Input_img); 
             cv_bridge::CvImagePtr Convert_Pcl2_to_Image(const sensor_msgs::PointCloud2ConstPtr& Input_img); 
             cv_bridge::CvImagePtr Convert_Image(const sensor_msgs::ImageConstPtr& Input_img); 
             cv_bridge::CvImagePtr Convert_Image(const sensor_msgs::Image& Input_img); 
 
-            void Synchronize(const sensor_msgs::ImageConstPtr& c_image, 
-                                const sensor_msgs::ImageConstPtr& d_image, 
-                                    const sensor_msgs::PointCloud2ConstPtr& d_points);
+            void Synchronize(const sensor_msgs::ImageConstPtr& l_image, 
+                                const sensor_msgs::ImageConstPtr& r_image);
         public:
 
             CALLBACK(ros::NodeHandle* _nh);
-            ~CALLBACK(){}
+            ~CALLBACK(){
+                for (int i = 0; i < (int)thread_list.size(); i++)
+                    thread_list[i].join();
+            }
     };
 
 }
