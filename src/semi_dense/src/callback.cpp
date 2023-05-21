@@ -135,7 +135,7 @@ void SYNC::CALLBACK::Synchronize(const sensor_msgs::ImageConstPtr& l_image,
         cv::resize( l_imgPtr->image, Curr_L_mat, cv::Size( 640, 480 ), 0, 0, CV_INTER_NN );
         cv::resize( r_imgPtr->image, Curr_R_mat, cv::Size( 640, 480 ), 0, 0, CV_INTER_NN );
 
-        Curr_D_mat = DM.test(Curr_L_mat, Curr_R_mat);
+        Curr_D_mat = DM(Curr_L_mat, Curr_R_mat, 1);
     }
     else
         ROS_INFO("No data");

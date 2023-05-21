@@ -5,137 +5,80 @@
 #include <opencv2/ximgproc.hpp>
 // #include "opencv2/contrib/contrib.hpp"
 
+struct Matcher_Param
+{
+    int minDisparity = -3;
+    int numDisparities = 96; //16 ~ 96          
+    int blockSize = 7;
+    int P1 = 60;
+    int P2 = 2400;
+    int disp12MaxDiff = 90;
+    int preFilterCap = 16;
+    int uniquenessRatio = 1; //63, 5~15
+    int speckleWindowSize = 60; //10, 50~200
+    int speckleRange = 20; //100, 1, 2
+    bool fullDP=true; //cv::StereoSGBM::MODE_SGBM; MODE_HH MODE_SGBM_3WAY MODE_HH4
+};
+
 class Depth_Map
 {
+private:
+    Matcher_Param mp;
+    cv::Ptr<cv::StereoSGBM> stereo;
+    cv::Ptr<cv::ximgproc::DisparityWLSFilter> wls_filter;
+    cv::Ptr<cv::StereoMatcher> sm;
+    double lambda;
+    double sigma;
+    cv::Mat left_disparity, right_disparity, show_disparity;
+    cv::Mat filtered_disparity, showFilteredDisparity;
+
 public:
-    cv::Mat calculate_disparity_map(cv::Mat& left, cv::Mat& right){
-        cv::Mat img_disparity_16s, img_disparity_8u;
-
-        int ndisparities = 16;
-        int blocksize = 21;
-        cv::Ptr<cv::StereoBM> stereo = cv::StereoBM::create(ndisparities, blocksize);
-
-        stereo->compute(left, right, img_disparity_16s);
-
-        double minVal; double maxVal;
-        minMaxLoc(img_disparity_16s, &minVal, &maxVal );
-        // std::cout << "min : " << minVal << ", max : " << maxVal << std::endl;
-        img_disparity_16s.convertTo(img_disparity_8u, CV_8UC1, 255/(maxVal - minVal));
-
-        return img_disparity_8u;
-    }
-    cv::Mat test2(cv::Mat& left, cv::Mat& right){
-        cv::Mat disparity_sgbm, disparity;
-        //param
-        int sgbmWinSize = 3;
-        int numberOfDisparities = 16 * 6;
-        int cn = 3;
-
-        int minDisparity = -3;
-        int numDisparities = 96; //16 ~ 96          
-        int blockSize = 7;
-        int P1 = 60;
-        int P2 = 2400;
-        int disp12MaxDiff = 90;
-        int preFilterCap = 16;
-        int uniquenessRatio = 1; //63, 5~15
-        int speckleWindowSize = 60; //10, 50~200
-        int speckleRange = 20; //100, 1, 2
-        bool fullDP=true;
-        cv::Ptr<cv::StereoSGBM> stereo = cv::StereoSGBM::create(
-            minDisparity,
-            numDisparities,
-            blockSize,
-            P1,
-            P2,
-            disp12MaxDiff,
-            preFilterCap,
-            uniquenessRatio,
-            speckleWindowSize,
-            speckleRange,
-            fullDP
+    void initalize(){
+        stereo = cv::StereoSGBM::create(mp.minDisparity, mp.numDisparities, mp.blockSize, 
+                    mp.P1, mp.P2, mp.disp12MaxDiff,
+                    mp.preFilterCap, mp.uniquenessRatio, mp.speckleWindowSize,
+                    mp.speckleRange,
+                    mp.fullDP
         );
-        stereo->compute(left, right, disparity_sgbm);
-        // disparity_sgbm.convertTo(disparity, CV_8UC1);
-        // disparity_sgbm.convertTo(disparity1, CV_32F, 1.0 / 16.0f);
-        cv::normalize(disparity_sgbm, disparity, 0, 255, CV_MINMAX, CV_8U);
-        
-        cv::imshow("L", left);
-        cv::imshow("R", right);
-
-        cv::imshow("Disparity", disparity_sgbm);        
-        cv::imshow("Normailze_Disparity", disparity);
-        cv::waitKey(1);
-
-
-        return disparity;
-    }
-    cv::Mat test(cv::Mat& left, cv::Mat& right){
-        int minDisparity = -3;
-        int numDisparities = 96; //16 ~ 96          
-        int blockSize = 7;
-        int P1 = 60;
-        int P2 = 2400;
-        int disp12MaxDiff = 90;
-        int preFilterCap = 16;
-        int uniquenessRatio = 1; //63, 5~15
-        int speckleWindowSize = 60; //10, 50~200
-        int speckleRange = 20; //100, 1, 2
-        bool fullDP=true;
-
-        cv::Ptr<cv::StereoSGBM> stereo = cv::StereoSGBM::create(
-            minDisparity,
-            numDisparities,
-            blockSize,
-            P1,
-            P2,
-            disp12MaxDiff,
-            preFilterCap,
-            uniquenessRatio,
-            speckleWindowSize,
-            speckleRange,
-            fullDP
-        );
-
-        //param
-        int sgbmWinSize = 3;
-        int numberOfDisparities = 16 * 6;
-        int cn = 3;
         // filter
-        cv::Ptr<cv::ximgproc::DisparityWLSFilter> wls_filter;
         wls_filter = cv::ximgproc::createDisparityWLSFilter(stereo);
         cv::Ptr<cv::StereoMatcher> sm = cv::ximgproc::createRightMatcher(stereo);
-        // param
-        double lambda = 8000.0;
-        double sigma = 1.5;
-
-        // init
-        // stereo->setPreFilterCap(63);
-        // stereo->setBlockSize(sgbmWinSize);
-        // stereo->setP1(8 * cn*sgbmWinSize*sgbmWinSize);
-        // stereo->setP2(32 * cn*sgbmWinSize*sgbmWinSize);
-        stereo->setMode(cv::StereoSGBM::MODE_SGBM_3WAY);
-
-        cv::Mat disparity_sgbm, show_disparity, img16Sr;
-        stereo->compute(left, right, disparity_sgbm);
-        sm->compute(right, left, img16Sr);
-
-        cv::normalize(disparity_sgbm, show_disparity, 0, 255, CV_MINMAX, CV_8U);
-        cv::imshow("disparity", show_disparity);
-
-        cv::Mat filtered_disparity, showFilteredDisparity;
+        // filter param
+        lambda = 8000.0;
+        sigma = 1.5;
+    }
+    void Filter_disparity_map(cv::Mat& left, cv::Mat& right){
+        sm->compute(right, left, this->right_disparity);
         wls_filter->setLambda(lambda);
         wls_filter->setSigmaColor(sigma);
-        wls_filter->filter(disparity_sgbm, left, filtered_disparity, img16Sr);
-        filtered_disparity.convertTo(showFilteredDisparity, CV_8U, 255 / (numberOfDisparities*16.));
-        
+        wls_filter->filter(this->left_disparity, left, this->filtered_disparity, this->right_disparity);
+        this->filtered_disparity.convertTo(this->showFilteredDisparity, CV_8U, 255 / (mp.numDisparities*16.));
+        //result[filtered_disparity, showFilteredDisparity]
+    }
+    void calculate_disparity_map(cv::Mat& left, cv::Mat& right){
+        stereo->setMode(cv::StereoSGBM::MODE_SGBM_3WAY);
+        stereo->compute(left, right, this->left_disparity);
+        cv::normalize(this->left_disparity, this->show_disparity, 0, 255, CV_MINMAX, CV_8U);
+        Filter_disparity_map(left, right);
+        //result[left_disparity, show_disparity, filtered_disparity, showFilteredDisparity]
+    }
+    void Display(cv::Mat& left, cv::Mat& right){
         cv::imshow("L", left);
         cv::imshow("R", right);
-        cv::imshow("Filtered Disparity", showFilteredDisparity);
+        cv::imshow("disparity", this->show_disparity);
+        cv::imshow("Filtered Disparity", this->showFilteredDisparity);
         cv::waitKey(1);
-
-        return showFilteredDisparity;
     }
+    cv::Mat operator()(cv::Mat& left, cv::Mat& right, bool show_flag){
+        calculate_disparity_map(left, right);
+        if(show_flag)
+            Display(left, right);
+        return this->showFilteredDisparity;
+    }
+    Depth_Map(){
+        initalize();
+    }
+    ~Depth_Map(){}
 };
 
 /*
