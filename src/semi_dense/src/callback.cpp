@@ -132,8 +132,8 @@ void SYNC::CALLBACK::Synchronize(const sensor_msgs::ImageConstPtr& l_image,
         // Curr_L_mat = l_imgPtr->image.clone();
         // Curr_R_mat = r_imgPtr->image.clone();
 
-        cv::resize( l_imgPtr->image, Curr_L_mat, cv::Size( 640, 480 ), 0, 0, CV_INTER_NN );
-        cv::resize( r_imgPtr->image, Curr_R_mat, cv::Size( 640, 480 ), 0, 0, CV_INTER_NN );
+        cv::resize(l_imgPtr->image, Curr_L_mat, cv::Size( 640, 480 ), 0, 0, CV_INTER_NN );
+        cv::resize(r_imgPtr->image, Curr_R_mat, cv::Size( 640, 480 ), 0, 0, CV_INTER_NN );
 
         Curr_D_mat = DM(Curr_L_mat, Curr_R_mat, 1);
     }
