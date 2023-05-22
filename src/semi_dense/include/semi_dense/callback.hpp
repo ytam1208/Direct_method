@@ -31,6 +31,9 @@ namespace SYNC
 {
     class CALLBACK : public GET_PARAM
     {
+        protected:
+            bool Use_Depth_filter;
+            bool Depth_show;
         public:
             cv::Mat Curr_D_mat;     //depth/image_raw
             cv::Mat Curr_Dp_mat;    //depth/points
@@ -43,6 +46,8 @@ namespace SYNC
             ros::NodeHandle nh;
             ros::Subscriber Image_info_sub;
             ros::Publisher Camera_info_r, Camera_info_l;
+            ros::Publisher Depth_pub;
+
             message_filters::Subscriber<sensor_msgs::Image> LColor_image_sub, RColor_image_sub;
             message_filters::Subscriber<sensor_msgs::Image> Depth_image_sub;
             message_filters::Subscriber<sensor_msgs::PointCloud2> Depth_point_sub;

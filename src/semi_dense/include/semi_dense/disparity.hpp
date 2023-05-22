@@ -1,8 +1,10 @@
-#include "opencv2/core/core.hpp"
-#include "opencv2/calib3d/calib3d.hpp"
+#include <opencv2/core/core.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/ximgproc.hpp>
+#include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/point_cloud2_iterator.h>
 
 struct Matcher_Param
 {
@@ -41,20 +43,22 @@ private:
     cv::Ptr<cv::StereoMatcher> sm;
     double lambda;
     double sigma;
-    cv::Mat left_disparity, right_disparity, show_disparity;
-    cv::Mat filtered_disparity, showFilteredDisparity;
+    cv::Mat left_disparity, right_disparity;
+    cv::Mat filtered_disparity, show_disparity, showFilteredDisparity;
+    cv::Mat depth;
+
+    pcl::PCLPointCloud2 pc2;
+    sensor_msgs::PointCloud2 point_cloud;
 
 public:
     void initalize(){
-        stereo = cv::StereoSGBM::create(mp.minDisparity, mp.numDisparities, mp.blockSize, 
-                    mp.P1, mp.P2, mp.disp12MaxDiff,
-                    mp.preFilterCap, mp.uniquenessRatio, mp.speckleWindowSize,
-                    mp.speckleRange,
-                    mp.fullDP
-        );
+        stereo = cv::StereoSGBM::create(mp.minDisparity,  mp.numDisparities,         mp.blockSize, 
+                                                  mp.P1,              mp.P2,     mp.disp12MaxDiff,
+                                        mp.preFilterCap, mp.uniquenessRatio, mp.speckleWindowSize,
+                                        mp.speckleRange,          mp.fullDP);
         // filter
         wls_filter = cv::ximgproc::createDisparityWLSFilter(stereo);
-        cv::Ptr<cv::StereoMatcher> sm = cv::ximgproc::createRightMatcher(stereo);
+        sm = cv::ximgproc::createRightMatcher(stereo);
         // filter param
         lambda = 8000.0;
         sigma = 1.5;
@@ -71,21 +75,51 @@ public:
         stereo->setMode(cv::StereoSGBM::MODE_SGBM_3WAY);
         stereo->compute(left, right, this->left_disparity);
         cv::normalize(this->left_disparity, this->show_disparity, 0, 255, CV_MINMAX, CV_8U);
-        Filter_disparity_map(left, right);
         //result[left_disparity, show_disparity, filtered_disparity, showFilteredDisparity]
     }
-    void Display(cv::Mat& left, cv::Mat& right){
+    void Display(cv::Mat& left, cv::Mat& right, bool Use_filter){
         cv::imshow("L", left);
         cv::imshow("R", right);
         cv::imshow("disparity", this->show_disparity);
-        cv::imshow("Filtered Disparity", this->showFilteredDisparity);
+        if(Use_filter)
+            cv::imshow("Filtered Disparity", this->showFilteredDisparity);
         cv::waitKey(1);
     }
-    cv::Mat operator()(cv::Mat& left, cv::Mat& right, bool show_flag){
+    void operator()(cv::Mat& left, cv::Mat& right, bool Use_filter, bool show_flag){
         calculate_disparity_map(left, right);
+        if(Use_filter)
+            Filter_disparity_map(left, right);
         if(show_flag)
-            Display(left, right);
-        return this->showFilteredDisparity;
+            Display(left, right, Use_filter);
+    }
+    sensor_msgs::PointCloud2 operator()(double fx, double fy, double cx, double cy, double base_line){
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+        this->depth = this->left_disparity.clone();
+
+        pcl::PointXYZ point;
+        for(int v = 0; v < depth.rows; v++){
+            for(int u = 0; u < depth.cols; u++){
+                // std::cout << depth.at<float>(v,u) << ", ";
+                double x = (u - cx) / fx;
+                double y = (v - cy) / fy;
+                point.z = (fx * base_line) / (depth.at<float>(v,u)); 
+
+                point.x = x * point.z;
+                point.y = y * point.z; 
+                std::cout << "[" << point.x << ", " << point.y << ", " << point.z << "]";
+                cloud->points.push_back(point);
+            }
+        }
+
+        pcl::toPCLPointCloud2(*cloud, pc2);
+        pcl_conversions::fromPCL(pc2, point_cloud);
+        point_cloud.width = depth.cols;
+        point_cloud.height = depth.rows;
+        point_cloud.is_dense = false;
+        point_cloud.header.frame_id = "map";
+        point_cloud.header.stamp = ros::Time::now();
+
+        return point_cloud;
     }
     Depth_Map(){
         initalize();

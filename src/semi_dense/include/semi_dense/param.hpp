@@ -5,7 +5,7 @@ class CAMERA_INTRINSIC_PARAM
 {
     public:
         float cx;
-        float cy;
+        float cy; 
         float fx;
         float fy;
         float depth_scale;

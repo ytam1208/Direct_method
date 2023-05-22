@@ -1,6 +1,8 @@
 #include "semi_dense/callback.hpp"
 
 SYNC::CALLBACK::CALLBACK(ros::NodeHandle* _nh):
+    Use_Depth_filter(true),
+    Depth_show(true),
     nh(*_nh),
     LColor_image_sub(nh, "/pylon/left/image_raw", 1),
     RColor_image_sub(nh, "/pylon/right/image_raw", 1),
@@ -9,7 +11,7 @@ SYNC::CALLBACK::CALLBACK(ros::NodeHandle* _nh):
     sync(MySyncPolicy(10), LColor_image_sub, RColor_image_sub){
         Camera_info_r = nh.advertise<sensor_msgs::CameraInfo>("/pylon/right/camera_info", 1);
         Camera_info_l = nh.advertise<sensor_msgs::CameraInfo>("/pylon/left/camera_info", 1);
-       
+        Depth_pub = nh.advertise<sensor_msgs::PointCloud2>("dp", 1);
         Image_info_sub = nh.subscribe("/camera_info", 1, &SYNC::CALLBACK::Camera_Info_callback, this),
         sync.registerCallback(boost::bind(&SYNC::CALLBACK::Synchronize, this, _1, _2));
 
@@ -134,8 +136,9 @@ void SYNC::CALLBACK::Synchronize(const sensor_msgs::ImageConstPtr& l_image,
 
         cv::resize(l_imgPtr->image, Curr_L_mat, cv::Size( 640, 480 ), 0, 0, CV_INTER_NN );
         cv::resize(r_imgPtr->image, Curr_R_mat, cv::Size( 640, 480 ), 0, 0, CV_INTER_NN );
-
-        Curr_D_mat = DM(Curr_L_mat, Curr_R_mat, 1);
+        DM(Curr_L_mat, Curr_R_mat, Use_Depth_filter, Depth_show);
+        Depth_pub.publish(DM(fx, fy, cx, cy, 0.8));
+        // Curr_D_mat = DM(Curr_L_mat, Curr_R_mat, Use_Depth_filter, Depth_show);
     }
     else
         ROS_INFO("No data");
