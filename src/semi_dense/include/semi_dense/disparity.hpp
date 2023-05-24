@@ -3,6 +3,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/ximgproc.hpp>
+
+#include <image_geometry/stereo_camera_model.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/point_cloud2_iterator.h>
 
@@ -49,6 +51,7 @@ private:
 
     pcl::PCLPointCloud2 pc2;
     sensor_msgs::PointCloud2 point_cloud;
+    float pixel2mm = 200.0f;
 
 public:
     void initalize(){
@@ -85,6 +88,9 @@ public:
             cv::imshow("Filtered Disparity", this->showFilteredDisparity);
         cv::waitKey(1);
     }
+    inline bool isValidpoint(const float pt){
+        return pt!=image_geometry::StereoCameraModel::MISSING_Z && !std::isinf(pt);
+    }
     void operator()(cv::Mat& left, cv::Mat& right, bool Use_filter, bool show_flag){
         calculate_disparity_map(left, right);
         if(Use_filter)
@@ -92,34 +98,59 @@ public:
         if(show_flag)
             Display(left, right, Use_filter);
     }
-    sensor_msgs::PointCloud2 operator()(double fx, double fy, double cx, double cy, double base_line){
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-        this->depth = this->left_disparity.clone();
+    sensor_msgs::PointCloud2Ptr operator()(cv::Mat& base, float focal_length, float base_line, float fx, float fy, float cx, float cy, Eigen::Matrix3d& R_D, Eigen::Vector3d& T_D){
+        this->depth = this->showFilteredDisparity.clone();
 
-        pcl::PointXYZ point;
-        for(int v = 0; v < depth.rows; v++){
-            for(int u = 0; u < depth.cols; u++){
-                // std::cout << depth.at<float>(v,u) << ", ";
-                double x = (u - cx) / fx;
-                double y = (v - cy) / fy;
-                point.z = (fx * base_line) / (depth.at<float>(v,u)); 
+        sensor_msgs::PointCloud2Ptr points_msg = boost::make_shared<sensor_msgs::PointCloud2>();
 
-                point.x = x * point.z;
-                point.y = y * point.z; 
-                std::cout << "[" << point.x << ", " << point.y << ", " << point.z << "]";
-                cloud->points.push_back(point);
+        points_msg->header.stamp = ros::Time::now();
+        points_msg->header.frame_id = "camera_link";
+        points_msg->width = depth.cols;
+        points_msg->height = depth.rows;
+        points_msg->is_dense = false;
+        points_msg->is_bigendian = false;
+        sensor_msgs::PointCloud2Modifier pcd_modifier(*points_msg);
+        pcd_modifier.setPointCloud2FieldsByString(2, "xyz", "rgb");
+        
+        sensor_msgs::PointCloud2Iterator<float> iter_x(*points_msg, "x");
+        sensor_msgs::PointCloud2Iterator<float> iter_y(*points_msg, "y");
+        sensor_msgs::PointCloud2Iterator<float> iter_z(*points_msg, "z");
+        sensor_msgs::PointCloud2Iterator<uint8_t> iter_r(*points_msg, "r");
+        sensor_msgs::PointCloud2Iterator<uint8_t> iter_g(*points_msg, "g");
+        sensor_msgs::PointCloud2Iterator<uint8_t> iter_b(*points_msg, "b");
+
+
+        float bad_point = std::numeric_limits<float>::quiet_NaN();
+        for(int v = 0; v < depth.rows; ++v)
+            for(int u = 0; u < depth.cols; ++u, ++iter_x, ++iter_y, ++iter_z){
+                float disparity = depth.at<uchar>(v,u);
+                if(isValidpoint((float)depth.at<uchar>(v,u))){
+                    *iter_x = v / pixel2mm;
+                    *iter_y = u / pixel2mm;
+                    *iter_z = disparity / pixel2mm;
+                    // Eigen::Vector3d input_p(*iter_x, *iter_y, *iter_z);
+                    // Eigen::Vector3d reprj_p(R_D * input_p + T_D);
+                    // *iter_x = reprj_p[0];
+                    // *iter_y = reprj_p[1];
+                    // *iter_z = reprj_p[2];
+                    // std::cout << *iter_x << ", " << *iter_y << ", " << *iter_z << std::endl;
+                }
+                else{
+                    *iter_x = *iter_y = *iter_z = bad_point;
+                }
+            }
+        const std::string encoding = "mono8";
+        if(encoding == sensor_msgs::image_encodings::MONO8){
+            for(int v = 0; v < base.rows; ++v){
+                for(int u = 0; u < base.cols; ++u, ++iter_r, ++iter_g, ++iter_b){
+                    uint8_t g = base.at<uchar>(v,u);
+                    // uint8_t g = depth.at<uchar>(v,u);
+                    *iter_r = *iter_g = *iter_b = g;
+                }
             }
         }
 
-        pcl::toPCLPointCloud2(*cloud, pc2);
-        pcl_conversions::fromPCL(pc2, point_cloud);
-        point_cloud.width = depth.cols;
-        point_cloud.height = depth.rows;
-        point_cloud.is_dense = false;
-        point_cloud.header.frame_id = "map";
-        point_cloud.header.stamp = ros::Time::now();
-
-        return point_cloud;
+        return points_msg;
     }
     Depth_Map(){
         initalize();

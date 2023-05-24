@@ -16,6 +16,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   std_msgs
+  geometry_msgs
+  image_geometry
   tf
   tf2
   tf_conversions
@@ -119,7 +121,7 @@ find_package(Pangolin REQUIRED)
 catkin_package(
  INCLUDE_DIRS include
 #  LIBRARIES semi_dense
- CATKIN_DEPENDS cv_bridge roscpp sensor_msgs std_msgs tf tf2 tf_conversions pcl_ros 
+ CATKIN_DEPENDS cv_bridge roscpp sensor_msgs std_msgs geometry_msgs image_geometry tf tf2 tf_conversions pcl_ros 
 #  DEPENDS system_lib
 )
 

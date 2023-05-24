@@ -2,6 +2,15 @@
 #define CALLBACK_H
 
 #include <ros/ros.h>
+#include <tf/tf.h>
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2/LinearMath/Matrix3x3.h>
+#include <tf2/LinearMath/Transform.h>
+#include <tf2/LinearMath/Vector3.h>
+#include <tf/transform_listener.h>
+#include <tf_conversions/tf_eigen.h>
+#include <tf/exceptions.h>
+
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <sensor_msgs/Image.h>
@@ -20,8 +29,11 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
-
+#include <opencv2/core/eigen.hpp>
 #include <thread>
+
+
+
 #include "semi_dense/param.hpp"
 #include "semi_dense/disparity.hpp"
 
@@ -34,6 +46,7 @@ namespace SYNC
         protected:
             bool Use_Depth_filter;
             bool Depth_show;
+            bool tf_ready;
         public:
             cv::Mat Curr_D_mat;     //depth/image_raw
             cv::Mat Curr_Dp_mat;    //depth/points
@@ -47,6 +60,10 @@ namespace SYNC
             ros::Subscriber Image_info_sub;
             ros::Publisher Camera_info_r, Camera_info_l;
             ros::Publisher Depth_pub;
+            
+            tf::TransformListener listener;
+            Eigen::Matrix3d R_D;
+            Eigen::Vector3d T_D;
 
             message_filters::Subscriber<sensor_msgs::Image> LColor_image_sub, RColor_image_sub;
             message_filters::Subscriber<sensor_msgs::Image> Depth_image_sub;
@@ -64,6 +81,7 @@ namespace SYNC
 
             void Synchronize(const sensor_msgs::ImageConstPtr& l_image, 
                                 const sensor_msgs::ImageConstPtr& r_image);
+            void Get_tf();
         public:
 
             CALLBACK(ros::NodeHandle* _nh);

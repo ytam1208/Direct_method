@@ -1,13 +1,14 @@
 #include "semi_dense/callback.hpp"
 
 SYNC::CALLBACK::CALLBACK(ros::NodeHandle* _nh):
+    tf_ready(false),
     Use_Depth_filter(true),
     Depth_show(true),
     nh(*_nh),
     LColor_image_sub(nh, "/pylon/left/image_raw", 1),
     RColor_image_sub(nh, "/pylon/right/image_raw", 1),
     Depth_image_sub(nh, "/camera/depth/image", 1),
-    Depth_point_sub(nh, "/camera/depth/points", 1),
+    Depth_point_sub(nh, "/camera/depth/points", 1000),
     sync(MySyncPolicy(10), LColor_image_sub, RColor_image_sub){
         Camera_info_r = nh.advertise<sensor_msgs::CameraInfo>("/pylon/right/camera_info", 1);
         Camera_info_l = nh.advertise<sensor_msgs::CameraInfo>("/pylon/left/camera_info", 1);
@@ -23,6 +24,7 @@ void SYNC::CALLBACK::Camera_Info_pub(){
         ros::Rate rate(0.5);
         sensor_msgs::CameraInfo info_camera;
         while(ros::ok()){
+
             info_camera.header.stamp = ros::Time::now();
             info_camera.K.assign(0.0);
             info_camera.K[0] = 1155.4288024742;
@@ -37,9 +39,7 @@ void SYNC::CALLBACK::Camera_Info_pub(){
     })));
     thread_list.push_back(std::move(std::thread([this](){
         ros::Rate rate(160);
-        sensor_msgs::CameraInfo info_camera;
         while(ros::ok()){
-            
             ros::spinOnce();
             rate.sleep();
         }
@@ -127,6 +127,7 @@ cv_bridge::CvImagePtr SYNC::CALLBACK::Convert_Image(const sensor_msgs::Image& In
 
 void SYNC::CALLBACK::Synchronize(const sensor_msgs::ImageConstPtr& l_image, 
                                     const sensor_msgs::ImageConstPtr& r_image){
+    Get_tf();
     cv_bridge::CvImagePtr l_imgPtr = Convert_Image(l_image);
     cv_bridge::CvImagePtr r_imgPtr = Convert_Image(r_image);
 
@@ -137,9 +138,31 @@ void SYNC::CALLBACK::Synchronize(const sensor_msgs::ImageConstPtr& l_image,
         cv::resize(l_imgPtr->image, Curr_L_mat, cv::Size( 640, 480 ), 0, 0, CV_INTER_NN );
         cv::resize(r_imgPtr->image, Curr_R_mat, cv::Size( 640, 480 ), 0, 0, CV_INTER_NN );
         DM(Curr_L_mat, Curr_R_mat, Use_Depth_filter, Depth_show);
-        Depth_pub.publish(DM(fx, fy, cx, cy, 0.8));
+        Depth_pub.publish(DM(Curr_L_mat, 4.0f, 800.0f, fx, fy, cx, cy, R_D, T_D));
         // Curr_D_mat = DM(Curr_L_mat, Curr_R_mat, Use_Depth_filter, Depth_show);
     }
     else
         ROS_INFO("No data");
+}
+
+void SYNC::CALLBACK::Get_tf(){
+    if(!tf_ready){  
+        std::string parent_frame = "map";
+        std::string child_frame = "camera_link_optical";
+        try{
+            tf::StampedTransform tf_msg;
+            bool scs = listener.waitForTransform(parent_frame, child_frame, ros::Time(0), ros::Duration(0));
+            if(scs){
+                listener.lookupTransform(parent_frame, child_frame, ros::Time(0), tf_msg);
+                tf::Matrix3x3 R(tf_msg.getRotation());
+                tf::matrixTFToEigen(R, R_D);
+                T_D = Eigen::Vector3d(tf_msg.getOrigin().x(), tf_msg.getOrigin().y(), tf_msg.getOrigin().z());
+                tf_ready = true;
+            }
+        }
+        catch(tf::LookupException e){
+            ROS_WARN("Cannot update TF for %s->%s. %s",
+                        parent_frame.c_str(), child_frame.c_str(), e.what());
+        }
+    }
 }
