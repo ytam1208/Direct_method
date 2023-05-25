@@ -132,22 +132,22 @@ void SYNC::CALLBACK::Synchronize(const sensor_msgs::ImageConstPtr& l_image,
     cv_bridge::CvImagePtr r_imgPtr = Convert_Image(r_image);
     try{
         if(!l_imgPtr->image.empty() && !r_imgPtr->image.empty()){
-            // Curr_L_mat = l_imgPtr->image.clone();
-            // Curr_R_mat = r_imgPtr->image.clone();
+            Curr_L_mat = l_imgPtr->image.clone();
+            Curr_R_mat = r_imgPtr->image.clone();
             
-            // cv::resize(l_imgPtr->image, Curr_L_mat, cv::Size( 640, 480 ), 0, 0, CV_INTER_NN );
-            // cv::resize(r_imgPtr->image, Curr_R_mat, cv::Size( 640, 480 ), 0, 0, CV_INTER_NN );
+            cv::resize(l_imgPtr->image, Curr_L_mat, cv::Size( 640, 480 ), 0, 0, CV_INTER_NN );
+            cv::resize(r_imgPtr->image, Curr_R_mat, cv::Size( 640, 480 ), 0, 0, CV_INTER_NN );
 
-            // DM(Curr_L_mat, Curr_R_mat, Use_Depth_filter, Depth_show);
-            // Depth_pub.publish(DM(Curr_L_mat, R_D, T_D));
+            DM(Curr_L_mat, Curr_R_mat, Use_Depth_filter, Depth_show);
+            Depth_pub.publish(DM(Curr_L_mat, R_D, T_D));
             // Curr_D_mat = DM(Curr_L_mat, Curr_R_mat, Use_Depth_filter, Depth_show);
         }
-        cv::Mat left = cv::imread("/home/cona/github/algorithm_ws/ROS_build/color/tsukuba_l.png", 0);
-        cv::Mat right = cv::imread("/home/cona/github/algorithm_ws/ROS_build/color/tsukuba_r.png", 0);
-        if(!left.empty() && !right.empty()){
-            DM(left, right, Use_Depth_filter, Depth_show);
-            Depth_pub.publish(DM(Curr_L_mat, R_D, T_D));
-        }
+        // cv::Mat left = cv::imread("/home/cona/github/algorithm_ws/ROS_build/color/tsukuba_l.png", 0);
+        // cv::Mat right = cv::imread("/home/cona/github/algorithm_ws/ROS_build/color/tsukuba_r.png", 0);
+        // if(!left.empty() && !right.empty()){
+        //     DM(left, right, Use_Depth_filter, Depth_show);
+        //     Depth_pub.publish(DM(Curr_L_mat, R_D, T_D));
+        // }
     }
     catch(cv::Exception e){
         ROS_ERROR("No Synchronize data");
