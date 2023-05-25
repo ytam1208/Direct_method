@@ -1,8 +1,10 @@
 <launch>
 
-<param name="robot_description" textfile="$(find semi_dense)/urdf/robot.urdf" />
-<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+	<param name="robot_description" textfile="$(find semi_dense)/urdf/robot.urdf" />
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
 	<node name="semi_dense" pkg="semi_dense" type="semi_dense_node" output="screen" /> 
 
+	<node type="rviz" name="rviz" pkg="rviz" args="-d $(find semi_dense)/rviz/config.rviz" />
 
 </launch>

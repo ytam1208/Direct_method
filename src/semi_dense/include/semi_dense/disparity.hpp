@@ -47,11 +47,12 @@ private:
     double sigma;
     cv::Mat left_disparity, right_disparity;
     cv::Mat filtered_disparity, show_disparity, showFilteredDisparity;
-    cv::Mat depth;
+    cv::Mat depth, show_depth;
 
     pcl::PCLPointCloud2 pc2;
     sensor_msgs::PointCloud2 point_cloud;
-    float pixel2mm = 200.0f;
+    float focal_length, base_line;
+    float pixel2mm = 1.0/1000.0;
 
 public:
     void initalize(){
@@ -67,6 +68,8 @@ public:
         sigma = 1.5;
     }
     void Filter_disparity_map(cv::Mat& left, cv::Mat& right){
+        this->filtered_disparity = cv::Mat::zeros(left.rows, left.cols, CV_8UC1);
+        this->showFilteredDisparity = cv::Mat::zeros(left.rows, left.cols, CV_8UC1);
         sm->compute(right, left, this->right_disparity);
         wls_filter->setLambda(lambda);
         wls_filter->setSigmaColor(sigma);
@@ -75,30 +78,60 @@ public:
         //result[filtered_disparity, showFilteredDisparity]
     }
     void calculate_disparity_map(cv::Mat& left, cv::Mat& right){
+        this->left_disparity = cv::Mat::zeros(left.rows, left.cols, CV_8UC1);
+        this->show_disparity = cv::Mat::zeros(left.rows, left.cols, CV_8UC1);
         stereo->setMode(cv::StereoSGBM::MODE_SGBM_3WAY);
         stereo->compute(left, right, this->left_disparity);
         cv::normalize(this->left_disparity, this->show_disparity, 0, 255, CV_MINMAX, CV_8U);
         //result[left_disparity, show_disparity, filtered_disparity, showFilteredDisparity]
     }
+    void calculate_disparity2depth_map(cv::Mat& disparity){
+        // show_depth = cv::Mat::zeros(disparity.rows, disparity.cols, CV_8UC1);
+        cv::Mat _depth = cv::Mat::zeros(disparity.rows, disparity.cols, CV_16FC1);
+        float depth = 0.0f;
+        float bad_point = std::numeric_limits<float>::quiet_NaN();
+        for(int v = 0; v < disparity.rows; v++)
+            for(int u = 0; u < disparity.cols; u++){
+                float disparity_value = (float)disparity.at<uchar>(v,u);
+                if(isValidpoint(disparity_value)){
+                    depth = (base_line * focal_length) / (disparity_value); //(base(meter) * focal(pixel) / disparity(pixel))
+                }
+                else{
+                    depth = bad_point;
+                }
+                // std::cout << depth*pixel2mm <<", ";
+                // _depth.at<float>(v,u) = depth;
+            }
+        this->depth = _depth.clone();
+    }
     void Display(cv::Mat& left, cv::Mat& right, bool Use_filter){
-        cv::imshow("L", left);
-        cv::imshow("R", right);
-        cv::imshow("disparity", this->show_disparity);
-        if(Use_filter)
-            cv::imshow("Filtered Disparity", this->showFilteredDisparity);
-        cv::waitKey(1);
+        try{
+            cv::imshow("L", left);
+            cv::imshow("R", right);
+            cv::imshow("disparity", this->show_disparity);
+            if(Use_filter)
+                cv::imshow("Filtered Disparity", this->showFilteredDisparity);
+            cv::waitKey(1);
+        }
+        catch(cv::Exception e){
+            if(!Use_filter)
+                ROS_ERROR("Empty image data Disparity[%d], Depth[%d]", this->show_disparity.empty(), this->show_depth.empty());
+            else
+                ROS_ERROR("Empty image data Filter_Disparity[%d] Disparity[%d], Depth[%d]", this->showFilteredDisparity.empty(), this->show_disparity.empty(), this->show_depth.empty());
+        }
     }
     inline bool isValidpoint(const float pt){
         return pt!=image_geometry::StereoCameraModel::MISSING_Z && !std::isinf(pt);
     }
     void operator()(cv::Mat& left, cv::Mat& right, bool Use_filter, bool show_flag){
         calculate_disparity_map(left, right);
+        calculate_disparity2depth_map(this->showFilteredDisparity);
         if(Use_filter)
             Filter_disparity_map(left, right);
         if(show_flag)
             Display(left, right, Use_filter);
     }
-    sensor_msgs::PointCloud2Ptr operator()(cv::Mat& base, float focal_length, float base_line, float fx, float fy, float cx, float cy, Eigen::Matrix3d& R_D, Eigen::Vector3d& T_D){
+    sensor_msgs::PointCloud2Ptr operator()(cv::Mat& base, Eigen::Matrix3d& R_D, Eigen::Vector3d& T_D){
         this->depth = this->showFilteredDisparity.clone();
 
         sensor_msgs::PointCloud2Ptr points_msg = boost::make_shared<sensor_msgs::PointCloud2>();
@@ -119,15 +152,14 @@ public:
         sensor_msgs::PointCloud2Iterator<uint8_t> iter_g(*points_msg, "g");
         sensor_msgs::PointCloud2Iterator<uint8_t> iter_b(*points_msg, "b");
 
-
         float bad_point = std::numeric_limits<float>::quiet_NaN();
         for(int v = 0; v < depth.rows; ++v)
             for(int u = 0; u < depth.cols; ++u, ++iter_x, ++iter_y, ++iter_z){
                 float disparity = depth.at<uchar>(v,u);
                 if(isValidpoint((float)depth.at<uchar>(v,u))){
-                    *iter_x = v / pixel2mm;
-                    *iter_y = u / pixel2mm;
-                    *iter_z = disparity / pixel2mm;
+                    *iter_x = v * pixel2mm;
+                    *iter_y = u * pixel2mm;
+                    *iter_z = disparity * pixel2mm;
                     // Eigen::Vector3d input_p(*iter_x, *iter_y, *iter_z);
                     // Eigen::Vector3d reprj_p(R_D * input_p + T_D);
                     // *iter_x = reprj_p[0];
@@ -152,7 +184,7 @@ public:
 
         return points_msg;
     }
-    Depth_Map(){
+    Depth_Map():focal_length(1155.428802f), base_line(0.08f){
         initalize();
     }
     ~Depth_Map(){}
