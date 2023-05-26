@@ -51,7 +51,6 @@ private:
     cv::Mat filtered_disparity, show_disparity, showFilteredDisparity;
     cv::Mat depth, show_depth;
 
-    pcl::PCLPointCloud2 pc2;
     std::vector<Eigen::Vector4d, Eigen::aligned_allocator<Eigen::Vector4d>> pointcloud;
 
     float focal_length, base_line;
@@ -78,7 +77,7 @@ public:
         wls_filter->setLambda(lambda);
         wls_filter->setSigmaColor(sigma);
         wls_filter->filter(this->left_disparity, left, this->filtered_disparity, this->right_disparity);
-        // this->filtered_disparity.convertTo(this->show_depth, CV_32F, 1.0 / 16.0f);
+        this->filtered_disparity.convertTo(this->show_depth, CV_32F, 1.0 / 16.0f);
         this->filtered_disparity.convertTo(this->showFilteredDisparity, CV_8U, 255 / (mp.numDisparities*16.));
         //result[filtered_disparity, showFilteredDisparity]
     }
@@ -96,33 +95,39 @@ public:
         // this->depth = cv::Mat::zeros(disparity.rows, disparity.cols, CV_32F);
         float depth = 0.0f;
         float bad_point = std::numeric_limits<float>::quiet_NaN();
+        float Max_depth = 20.0f;
         for(int v = 0; v < disparity.rows; v++)
             for(int u = 0; u < disparity.cols; u++){
                 float disparity_value = disparity.at<float>(v,u);
                 if(disparity_value <= 0.0 || disparity_value >= 96.0) continue;
                 
-                Eigen::Vector4d point(0, 0, 0, (double)left.at<uchar>(v, u)); 
+                Eigen::Vector4d point(0, 0, 0, (double)left.at<uchar>(v, u)/255.0); 
                 if(isValidpoint(disparity_value))
                     depth = ((base_line * focal_length) / (disparity_value)); //(base(meter) * focal(pixel) / disparity(pixel))
                 else
-                    depth = bad_point;                
+                    depth = bad_point;   
+
+                if(depth  > Max_depth || depth == 0.0)  
+                    depth = Max_depth;
+
                 double x = (u - cx)/fx;
                 double y = (v - cy)/fy;
                 point[0] = x * depth;
                 point[1] = y * depth;
                 point[2] = depth;
+                
                 // this->depth.at<uchar>(u,v) = (int)depth;
                 pointcloud.push_back(point);
             }
     }
     void Display(cv::Mat& left, cv::Mat& right, bool Use_filter){
         try{
-            cv::imshow("L", left);
-            cv::imshow("R", right);
-            cv::imshow("disparity", this->show_disparity/96.0);
+            // cv::imshow("L", left);
+            // cv::imshow("R", right);
+            // cv::imshow("disparity", this->show_disparity/96.0);
             if(Use_filter)
                 cv::imshow("Filtered Disparity", this->showFilteredDisparity);
-            cv::waitKey(0);
+            cv::waitKey(1);
         }
         catch(cv::Exception e){
             if(!Use_filter)
