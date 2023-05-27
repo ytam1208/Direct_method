@@ -5,16 +5,20 @@ SYNC::CALLBACK::CALLBACK(ros::NodeHandle* _nh):
     Use_Depth_filter(true),
     Depth_show(true),
     nh(*_nh),
-    LColor_image_sub(nh, "/pylon/left/image_raw", 1),
-    RColor_image_sub(nh, "/pylon/right/image_raw", 1),
+    // LColor_image_sub(nh, "/pylon/left/image_raw", 1),
+    // RColor_image_sub(nh, "/pylon/right/image_raw", 1),
+    LC_Color_image_sub(nh, "/pylon/left/image_raw/compressed", 1),
+    RC_Color_image_sub(nh, "/pylon/right/image_raw/compressed", 1),
     Depth_image_sub(nh, "/camera/depth/image", 1),
     Depth_point_sub(nh, "/camera/depth/points", 1000),
-    sync(MySyncPolicy(10), LColor_image_sub, RColor_image_sub){
+    sync(MySyncPolicy(10), LColor_image_sub, RColor_image_sub),
+    sync_c(MySyncPolicy_C(10), LC_Color_image_sub, RC_Color_image_sub){
         Camera_info_r = nh.advertise<sensor_msgs::CameraInfo>("/pylon/right/camera_info", 1);
         Camera_info_l = nh.advertise<sensor_msgs::CameraInfo>("/pylon/left/camera_info", 1);
         Depth_pub = nh.advertise<sensor_msgs::PointCloud2>("dp", 1);
         Image_info_sub = nh.subscribe("/camera_info", 1, &SYNC::CALLBACK::Camera_Info_callback, this),
-        sync.registerCallback(boost::bind(&SYNC::CALLBACK::Synchronize, this, _1, _2));
+        // sync.registerCallback(boost::bind(&SYNC::CALLBACK::Synchronize, this, _1, _2));
+        sync_c.registerCallback(boost::bind(&SYNC::CALLBACK::Synchronize_C, this, _1, _2));
 
         Camera_Info_pub();
 }
@@ -125,6 +129,16 @@ cv_bridge::CvImagePtr SYNC::CALLBACK::Convert_Image(const sensor_msgs::Image& In
     }    
 }
 
+cv::Mat SYNC::CALLBACK::Convert_Image(const sensor_msgs::CompressedImageConstPtr& Input_img){
+    try{
+        return cv::imdecode(cv::Mat(Input_img->data), 1);
+    }
+    catch(cv_bridge::Exception& e){
+        ROS_ERROR("Error exception[cv::imdecode, Convert_Image_Ptr]: %s", e.what());
+        return cv::Mat::zeros(cv::Mat(Input_img->data).rows, cv::Mat(Input_img->data).cols, CV_8UC1);
+    }    
+}
+
 void SYNC::CALLBACK::Synchronize(const sensor_msgs::ImageConstPtr& l_image, 
                                     const sensor_msgs::ImageConstPtr& r_image){
     Get_tf();
@@ -148,6 +162,25 @@ void SYNC::CALLBACK::Synchronize(const sensor_msgs::ImageConstPtr& l_image,
         //     DM(left, right, Use_Depth_filter, Depth_show);
         //     Depth_pub.publish(DM(Curr_L_mat, R_D, T_D));
         // }
+    }
+    catch(cv::Exception e){
+        ROS_ERROR("No Synchronize data");
+    }
+}
+
+void SYNC::CALLBACK::Synchronize_C(const sensor_msgs::CompressedImageConstPtr& l_image, 
+                                    const sensor_msgs::CompressedImageConstPtr& r_image){
+    Get_tf();
+    try{
+        if(!l_image->data.empty() && !r_image->data.empty()){
+            cv::Mat l_img = Convert_Image(l_image);
+            cv::Mat r_img = Convert_Image(r_image);
+            cv::resize(l_img, l_img, cv::Size(640, 480), 0, 0, CV_INTER_NN);
+            cv::resize(r_img, r_img, cv::Size(640, 480), 0, 0, CV_INTER_NN);
+            DM(l_img, l_img, Use_Depth_filter, Depth_show);
+            Depth_pub.publish(DM(l_img, R_D, T_D));
+            // Curr_D_mat = DM(Curr_L_mat, Curr_R_mat, Use_Depth_filter, Depth_show);
+        }
     }
     catch(cv::Exception e){
         ROS_ERROR("No Synchronize data");

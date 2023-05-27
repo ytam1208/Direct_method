@@ -14,7 +14,7 @@ struct Matcher_Param
 {
     int minDisparity = -3;
     int numDisparities = 96; //16 ~ 96          
-    int blockSize = 7;
+    int blockSize = 11;
     int P1 = 60;
     int P2 = 2400;
     int disp12MaxDiff = 90;
@@ -95,20 +95,22 @@ public:
         // this->depth = cv::Mat::zeros(disparity.rows, disparity.cols, CV_32F);
         float depth = 0.0f;
         float bad_point = std::numeric_limits<float>::quiet_NaN();
-        float Max_depth = 20.0f;
+        float Min_depth = 0.0f;
+        float Max_depth = 0.2f;
         for(int v = 0; v < disparity.rows; v++)
             for(int u = 0; u < disparity.cols; u++){
                 float disparity_value = disparity.at<float>(v,u);
                 if(disparity_value <= 0.0 || disparity_value >= 96.0) continue;
-                
                 Eigen::Vector4d point(0, 0, 0, (double)left.at<uchar>(v, u)/255.0); 
                 if(isValidpoint(disparity_value))
                     depth = ((base_line * focal_length) / (disparity_value)); //(base(meter) * focal(pixel) / disparity(pixel))
                 else
                     depth = bad_point;   
 
-                if(depth  > Max_depth || depth == 0.0)  
+                if(depth  > Max_depth)  
                     depth = Max_depth;
+                else if(depth < Min_depth)
+                    depth = Min_depth;
 
                 double x = (u - cx)/fx;
                 double y = (v - cy)/fy;
@@ -122,9 +124,9 @@ public:
     }
     void Display(cv::Mat& left, cv::Mat& right, bool Use_filter){
         try{
-            // cv::imshow("L", left);
-            // cv::imshow("R", right);
-            // cv::imshow("disparity", this->show_disparity/96.0);
+            cv::imshow("L", left);
+            cv::imshow("R", right);
+            cv::imshow("disparity", this->show_disparity/96.0);
             if(Use_filter)
                 cv::imshow("Filtered Disparity", this->showFilteredDisparity);
             cv::waitKey(1);

@@ -50,8 +50,8 @@ int main(int argc, char** argv)
     ros::NodeHandle nh1;
 
     SYNC::CALLBACK cb(&nh1);
-    // ros::Publisher tf_gt_pub = nh1.advertise<tf2_msgs::TFMessage>("tf", 1);
-    // ros::Publisher tf_ob_pub = nh1.advertise<tf2_msgs::TFMessage>("tf", 1);
+    ros::Publisher tf_gt_pub = nh1.advertise<tf2_msgs::TFMessage>("tf", 1);
+    ros::Publisher tf_ob_pub = nh1.advertise<tf2_msgs::TFMessage>("tf", 1);
     // XmlRpc::XmlRpcValue* camera_intrinsic = new XmlRpc::XmlRpcValue;
     // nh.getParam("/Set_Display", mc->show);
     // nh.getParam("/CAMERA_INTRINSIC_PARAM", *camera_intrinsic);

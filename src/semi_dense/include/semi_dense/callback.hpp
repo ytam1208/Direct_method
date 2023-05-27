@@ -38,6 +38,7 @@
 #include "semi_dense/disparity.hpp"
 
 typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> MySyncPolicy;
+typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::CompressedImage, sensor_msgs::CompressedImage> MySyncPolicy_C;
 
 namespace SYNC
 {
@@ -52,7 +53,8 @@ namespace SYNC
             cv::Mat Curr_Dp_mat;    //depth/points
             cv::Mat Curr_R_mat;     //right/color/image_raw
             cv::Mat Curr_L_mat;     //left/color/image_raw  
-         
+            cv_bridge::CvImagePtr output;
+
             std::vector<cv::Point3f> Depth_pt_v;
             std::vector<std::thread> thread_list;
         private:
@@ -66,10 +68,12 @@ namespace SYNC
             Eigen::Vector3d T_D;
 
             message_filters::Subscriber<sensor_msgs::Image> LColor_image_sub, RColor_image_sub;
+            message_filters::Subscriber<sensor_msgs::CompressedImage> LC_Color_image_sub, RC_Color_image_sub;
             message_filters::Subscriber<sensor_msgs::Image> Depth_image_sub;
             message_filters::Subscriber<sensor_msgs::PointCloud2> Depth_point_sub;
             
             message_filters::Synchronizer<MySyncPolicy> sync;
+            message_filters::Synchronizer<MySyncPolicy_C> sync_c;
             Depth_Map DM;
         public:
             void Camera_Info_pub();
@@ -78,9 +82,13 @@ namespace SYNC
             cv_bridge::CvImagePtr Convert_Pcl2_to_Image(const sensor_msgs::PointCloud2ConstPtr& Input_img); 
             cv_bridge::CvImagePtr Convert_Image(const sensor_msgs::ImageConstPtr& Input_img); 
             cv_bridge::CvImagePtr Convert_Image(const sensor_msgs::Image& Input_img); 
+            cv::Mat Convert_Image(const sensor_msgs::CompressedImageConstPtr& Input_img);
 
             void Synchronize(const sensor_msgs::ImageConstPtr& l_image, 
                                 const sensor_msgs::ImageConstPtr& r_image);
+            void Synchronize_C(const sensor_msgs::CompressedImageConstPtr& l_image, 
+                                const sensor_msgs::CompressedImageConstPtr& r_image);
+
             void Get_tf();
         public:
 
