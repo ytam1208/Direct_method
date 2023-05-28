@@ -15,11 +15,11 @@ this_name("Semi_Direct"), idx(0){
 }
 Semi_Direct::Semi_Direct(SYNC::CALLBACK& data):
 this_name("Semi_Direct"), idx(0){
-    cx = data.cx;
-    cy = data.cy;
-    fx = data.fx;
-    fy = data.fy;
-    depth_scale = data.depth_scale;
+    cx = 927.60066037599;
+    cy = 569.32829231548;
+    fx = 1155.4288024742;
+    fy = 1155.4857727463;
+    depth_scale = 1000.0;
     srand((unsigned int) time(0));
     K << fx,  0.f, cx,
         0.f,  fy,  cy,
@@ -113,7 +113,7 @@ void Semi_Direct::runloop(SYNC::CALLBACK& data){
     int index(0);
     poses.push_back(om.Tcw);
 
-    ros::Rate rate(160);
+    ros::Rate rate(10);
     while(ros::ok()){
         Eigen::Isometry3d Tcw = Eigen::Isometry3d::Identity();
         std::cout << "*********** loop " << index << " ************" << std::endl;
@@ -180,13 +180,13 @@ void Semi_Direct::compute_gradient(){
                     prev_gray.ptr<uchar>(y)[x+1] - prev_gray.ptr<uchar>(y)[x-1], 
                     prev_gray.ptr<uchar>(y+1)[x] - prev_gray.ptr<uchar>(y-1)[x]
                 );
-                if(delta.norm() < 50)
+                if(delta.norm() < 10)
                     continue;
                 // ushort d = (ushort)curr_depth.at<uchar>(y,x);
-                ushort d = 2000;
+                ushort d = 1000.0;
                 if(d==0)
                     continue;
-    
+                // std::cout << x << ", " << y << ", " << d << ", " << fx << ", " << fy << ", " << cx << ", " << cy << ", " << depth_scale << std::endl;
                 Eigen::Vector3d p3d = project2Dto3D(x, y, d, fx, fy, cx, cy, depth_scale);
                 float grayscale = float(prev_gray.ptr<uchar>(y)[x]);
                 measurements.push_back(Measurement(p3d, grayscale));
@@ -206,7 +206,7 @@ void Semi_Direct::compute_gradient(){
 bool Semi_Direct::PoseEstimationDirect(Eigen::Isometry3d& Tcw){
     if(curr_gray.empty())
         throw Exception("Process exception[" + this_name + "][PoseEstimationDirect] check your input data! [Error code] std::exception");
-    std::cout << "in" << std::endl;
+
     typedef g2o::BlockSolver<g2o::BlockSolverTraits<6,1>> DirectBlock;  
     DirectBlock::LinearSolverType* linearSolver = new g2o::LinearSolverDense<DirectBlock::PoseMatrixType>();
     DirectBlock* solver_ptr = new DirectBlock (linearSolver);
@@ -224,6 +224,7 @@ bool Semi_Direct::PoseEstimationDirect(Eigen::Isometry3d& Tcw){
 
     int id(1);
     for (Measurement m: measurements){
+        // std::cout << m.pos_world[0] << ", " << m.pos_world[1] << ", " << m.pos_world[2] << std::endl;
         EdgeSE3ProjectDirect* edge = new EdgeSE3ProjectDirect(
             m.pos_world,
             K(0,0), K(1,1), K(0,2), K(1,2), &curr_gray
@@ -242,9 +243,9 @@ bool Semi_Direct::PoseEstimationDirect(Eigen::Isometry3d& Tcw){
     // Eigen::Isometry3d relative_pose = om.getMotion(Tcw);
     Eigen::Isometry3d Update_odom = om.addMotion(om.Tcw, Tcw);
     om.Tcw = Update_odom;
-    om.print_RT(Tcw);
-    // om.print_RT(om.Tcw);
-    poses.push_back(om.Tcw);   
+    // om.print_RT(Tcw);
+    om.print_RT(om.Tcw);
+    // poses.push_back(om.Tcw);   
     return true;
 }
 
@@ -278,7 +279,7 @@ void Semi_Direct::Display_Feature(Eigen::Isometry3d& Tcw){
         cv::putText(img_show, "Prev", cv::Point(10,20), 1, 1, cv::Scalar(0,0,255), 2, 8);
         cv::putText(img_show, "Current", cv::Point(10,20+curr_color.rows), 1, 1, cv::Scalar(0,0,255), 2, 8);
         cv::imshow("Result", img_show);
-        cv::waitKey(1);
+        cv::waitKey(0);
     }
     catch(std::bad_alloc& e){
         throw Exception("Process exception[" + this_name + "][Display_Feature] check your input data! [Error code] std::bad_alloc");

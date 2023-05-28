@@ -42,7 +42,7 @@ void SYNC::CALLBACK::Camera_Info_pub(){
         }
     })));
     thread_list.push_back(std::move(std::thread([this](){
-        ros::Rate rate(160);
+        ros::Rate rate(10);
         while(ros::ok()){
             ros::spinOnce();
             rate.sleep();
