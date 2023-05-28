@@ -13,6 +13,19 @@ this_name("Semi_Direct"), idx(0){
         0.f, 0.f, 1.0f;
     om.Tcw = _Tcw;
 }
+Semi_Direct::Semi_Direct(SYNC::CALLBACK& data):
+this_name("Semi_Direct"), idx(0){
+    cx = data.cx;
+    cy = data.cy;
+    fx = data.fx;
+    fy = data.fy;
+    depth_scale = data.depth_scale;
+    srand((unsigned int) time(0));
+    K << fx,  0.f, cx,
+        0.f,  fy,  cy,
+        0.f, 0.f, 1.0f;
+    om.Tcw = Eigen::Isometry3d::Identity();
+}
 
 bool Semi_Direct::Get_data(DF& _data){
     if(!(_data.color.empty()) && !(_data.depth.empty())){
@@ -24,6 +37,20 @@ bool Semi_Direct::Get_data(DF& _data){
     else{
         ROS_ERROR("[Semi_Direct][Get_data] No Get data!! Curr_C_mat[%d], Curr_D_mat[%d]", 
         (_data).color.empty(), (_data).depth.empty());
+        return false;
+    }
+}
+
+bool Semi_Direct::Get_data(SYNC::CALLBACK& data){
+    if(!(data.Curr_L_mat.empty()) && !(data.Curr_D_mat.empty())){
+        curr_color = data.Curr_L_mat.clone();
+        curr_gray = data.Curr_L_mat.clone();
+        curr_depth = data.Curr_D_mat.clone();
+        return true;
+    }
+    else{
+        ROS_ERROR("[Semi_Direct][Get_data] No Get data!! Curr_C_mat[%d], Curr_D_mat[%d]", 
+        data.Curr_L_mat.empty(), data.Curr_D_mat.empty());
         return false;
     }
 }
@@ -80,6 +107,58 @@ void Semi_Direct::runloop(std::unique_ptr<DBLoader>& _data){
     }
 }
 
+void Semi_Direct::runloop(SYNC::CALLBACK& data){
+    bool show_flag = 1;
+    bool first_index = false;
+    int index(0);
+    poses.push_back(om.Tcw);
+
+    ros::Rate rate(160);
+    while(ros::ok()){
+        Eigen::Isometry3d Tcw = Eigen::Isometry3d::Identity();
+        std::cout << "*********** loop " << index << " ************" << std::endl;
+        if(!Get_data(data)) 
+            continue;
+        else{
+            if(index == 0){
+                prev_color = curr_color.clone();
+                prev_depth = curr_depth.clone();
+                prev_gray = curr_gray.clone();
+                compute_gradient();
+                index++;
+                continue;
+            }
+            else{
+                if(index != 1){
+                    measurements.clear();
+                    compute_gradient();
+                }
+                std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+                try{
+                    PoseEstimationDirect(Tcw);
+                }catch(std::bad_alloc& bad){
+                    throw Exception("Process exception[" + this_name + "][PoseEstimationDirect] [Error code] std::bad_alloc");
+                }catch(Exception& exp){
+                    throw Exception("Process exception[" + this_name + "][PoseEstimationDirect] [Error code] std::excpetion");
+                }catch(...){
+                    throw Exception("Process exception[" + this_name + "][PoseEstimationDirect] [Error code] Other Exception");
+                }
+                std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+                std::chrono::duration<double> time_used = std::chrono::duration_cast<std::chrono::duration<double>> (t2-t1);
+                std::cout << "direct method costs time: " << time_used.count() << " seconds." << std::endl;
+                Display_Feature(Tcw);
+
+                prev_color = curr_color.clone();
+                prev_depth = curr_depth.clone();
+                prev_gray = curr_gray.clone();
+            }
+        }
+        index++;
+        ros::spinOnce();
+        rate.sleep();
+    }
+}
+
 inline Eigen::Vector3d Semi_Direct::project2Dto3D(int x, int y, int d, float fx, float fy, float cx, float cy, float scale){
     float zz = float(d) / scale;
     float xx = zz * (x-cx) / fx;
@@ -103,11 +182,11 @@ void Semi_Direct::compute_gradient(){
                 );
                 if(delta.norm() < 50)
                     continue;
-                // ushort d = curr_depth.at<ushort>(y,x);
-                ushort d = prev_depth.ptr<ushort>(y)[x];
+                // ushort d = (ushort)curr_depth.at<uchar>(y,x);
+                ushort d = 2000;
                 if(d==0)
                     continue;
-
+    
                 Eigen::Vector3d p3d = project2Dto3D(x, y, d, fx, fy, cx, cy, depth_scale);
                 float grayscale = float(prev_gray.ptr<uchar>(y)[x]);
                 measurements.push_back(Measurement(p3d, grayscale));
@@ -127,6 +206,7 @@ void Semi_Direct::compute_gradient(){
 bool Semi_Direct::PoseEstimationDirect(Eigen::Isometry3d& Tcw){
     if(curr_gray.empty())
         throw Exception("Process exception[" + this_name + "][PoseEstimationDirect] check your input data! [Error code] std::exception");
+    std::cout << "in" << std::endl;
     typedef g2o::BlockSolver<g2o::BlockSolverTraits<6,1>> DirectBlock;  
     DirectBlock::LinearSolverType* linearSolver = new g2o::LinearSolverDense<DirectBlock::PoseMatrixType>();
     DirectBlock* solver_ptr = new DirectBlock (linearSolver);
@@ -135,7 +215,7 @@ bool Semi_Direct::PoseEstimationDirect(Eigen::Isometry3d& Tcw){
 
     g2o::SparseOptimizer optimizer;
     optimizer.setAlgorithm(solver);
-    // optimizer.setVerbose(true);
+    optimizer.setVerbose(true);
 
     g2o::VertexSE3Expmap* pose = new g2o::VertexSE3Expmap();
     pose->setEstimate (g2o::SE3Quat(Tcw.rotation(), Tcw.translation()));
@@ -198,7 +278,7 @@ void Semi_Direct::Display_Feature(Eigen::Isometry3d& Tcw){
         cv::putText(img_show, "Prev", cv::Point(10,20), 1, 1, cv::Scalar(0,0,255), 2, 8);
         cv::putText(img_show, "Current", cv::Point(10,20+curr_color.rows), 1, 1, cv::Scalar(0,0,255), 2, 8);
         cv::imshow("Result", img_show);
-        cv::waitKey(0);
+        cv::waitKey(1);
     }
     catch(std::bad_alloc& e){
         throw Exception("Process exception[" + this_name + "][Display_Feature] check your input data! [Error code] std::bad_alloc");

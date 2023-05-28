@@ -175,11 +175,20 @@ void SYNC::CALLBACK::Synchronize_C(const sensor_msgs::CompressedImageConstPtr& l
         if(!l_image->data.empty() && !r_image->data.empty()){
             cv::Mat l_img = Convert_Image(l_image);
             cv::Mat r_img = Convert_Image(r_image);
-            cv::resize(l_img, l_img, cv::Size(640, 480), 0, 0, CV_INTER_NN);
-            cv::resize(r_img, r_img, cv::Size(640, 480), 0, 0, CV_INTER_NN);
-            DM(l_img, l_img, Use_Depth_filter, Depth_show);
-            Depth_pub.publish(DM(l_img, R_D, T_D));
+            cv::resize(l_img, Curr_L_mat, cv::Size(640, 480), 0, 0, CV_INTER_NN);
+            cv::resize(r_img, Curr_R_mat, cv::Size(640, 480), 0, 0, CV_INTER_NN);
+            Depth_show = false;
+            DM(Curr_L_mat, Curr_R_mat, Use_Depth_filter, Depth_show);
+            Curr_D_mat = DM.depth.clone();
+            // Depth_pub.publish(DM(l_img, R_D, T_D));
             // Curr_D_mat = DM(Curr_L_mat, Curr_R_mat, Use_Depth_filter, Depth_show);
+            // cv::Mat left = cv::imread("/home/cona/github/algorithm_ws/ROS_build/color/tsukuba_l.png", 0);
+            // cv::Mat right = cv::imread("/home/cona/github/algorithm_ws/ROS_build/color/tsukuba_r.png", 0);
+            // if(!left.empty() && !right.empty()){
+            //     DM(left, right, Use_Depth_filter, Depth_show);
+            //     Depth_pub.publish(DM(left, R_D, T_D));
+            // }
+            
         }
     }
     catch(cv::Exception e){

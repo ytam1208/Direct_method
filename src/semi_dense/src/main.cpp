@@ -50,15 +50,12 @@ int main(int argc, char** argv)
     ros::NodeHandle nh1;
 
     SYNC::CALLBACK cb(&nh1);
-    ros::Publisher tf_gt_pub = nh1.advertise<tf2_msgs::TFMessage>("tf", 1);
-    ros::Publisher tf_ob_pub = nh1.advertise<tf2_msgs::TFMessage>("tf", 1);
-    // XmlRpc::XmlRpcValue* camera_intrinsic = new XmlRpc::XmlRpcValue;
-    // nh.getParam("/Set_Display", mc->show);
-    // nh.getParam("/CAMERA_INTRINSIC_PARAM", *camera_intrinsic);
+    // ros::Publisher tf_gt_pub = nh1.advertise<tf2_msgs::TFMessage>("tf", 1);
+    // ros::Publisher tf_ob_pub = nh1.advertise<tf2_msgs::TFMessage>("tf", 1);
 #endif
     try{
-        // Semi_Direct sd(cam_intrinsic, mc, mc->poses[0]);    
-        // sd.runloop(mc);
+        Semi_Direct sd(cb);    
+        sd.runloop(cb);
 #ifdef __View_Pangoline__
         Pango::Loader ld(ground_truth, cam_intrinsic, sd.poses, mc->poses);
 #endif

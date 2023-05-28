@@ -47,6 +47,7 @@ private:
     cv::Ptr<cv::StereoMatcher> sm;
     double lambda;
     double sigma;
+public:
     cv::Mat left_disparity, right_disparity;
     cv::Mat filtered_disparity, show_disparity, showFilteredDisparity;
     cv::Mat depth, show_depth;
@@ -92,7 +93,7 @@ public:
     }
     void calculate_disparity2depth_map(cv::Mat& left, cv::Mat& disparity){
         pointcloud.clear();
-        // this->depth = cv::Mat::zeros(disparity.rows, disparity.cols, CV_32F);
+        this->depth = cv::Mat::zeros(left.rows, left.cols, CV_8UC1);
         float depth = 0.0f;
         float bad_point = std::numeric_limits<float>::quiet_NaN();
         float Min_depth = 0.0f;
@@ -111,15 +112,15 @@ public:
                     depth = Max_depth;
                 else if(depth < Min_depth)
                     depth = Min_depth;
-
+                
                 double x = (u - cx)/fx;
                 double y = (v - cy)/fy;
                 point[0] = x * depth;
                 point[1] = y * depth;
                 point[2] = depth;
-                
-                // this->depth.at<uchar>(u,v) = (int)depth;
+                this->depth.at<uchar>(v,u) = (int)depth;
                 pointcloud.push_back(point);
+                // std::cout << point[2] << ", ";
             }
     }
     void Display(cv::Mat& left, cv::Mat& right, bool Use_filter){
@@ -127,6 +128,7 @@ public:
             cv::imshow("L", left);
             cv::imshow("R", right);
             cv::imshow("disparity", this->show_disparity/96.0);
+            cv::imshow("depth", this->depth);
             if(Use_filter)
                 cv::imshow("Filtered Disparity", this->showFilteredDisparity);
             cv::waitKey(1);
