@@ -31,12 +31,12 @@ public:
     std::vector<DF> frames;
     std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>> poses;
     void Get_ground_data(const std::string& ground_path);
-    void Get_Image_data(const int img_cnt);
+    void Get_Image_data();
     void Get_Image_data(const std::string& ass_path, const std::string& local_path);
 public:
     DBLoader(const int img_cnt){
             std::cout << "Road Data [" << img_cnt << "]!" << std::endl;
-            this->Get_Image_data(img_cnt);
+            this->Get_Image_data();
     }
     DBLoader(const std::string& local_path, const std::string& ground_path, const std::string& associate_path):
     this_name("DBLoader"){
