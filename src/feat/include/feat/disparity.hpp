@@ -134,7 +134,6 @@ public:
             // cv::imshow("depth", this->depth);
             if(Use_filter)
                 cv::imshow("Filtered Disparity", this->showFilteredDisparity);
-            cv::waitKey(0);
         }
         catch(cv::Exception e){
             if(!Use_filter)
@@ -142,16 +141,17 @@ public:
             else
                 ROS_ERROR("Empty image data Filter_Disparity[%d] Disparity[%d], Depth[%d]", this->showFilteredDisparity.empty(), this->show_disparity.empty(), this->show_depth.empty());
         }
+        cv::waitKey(0);
     }
     inline bool isValidpoint(const float pt){
         return pt!=image_geometry::StereoCameraModel::MISSING_Z && !std::isinf(pt);
     }
     void operator()(cv::Mat& left, cv::Mat& right, bool Use_filter, bool show_flag){
         calculate_disparity_map(left, right);
+        calculate_disparity2depth_map(left, this->show_disparity);
+        
         if(Use_filter)
             Filter_disparity_map(left, right);
-        calculate_disparity2depth_map(left, this->show_disparity);
-
         if(show_flag)
             Display(left, right, Use_filter);
     }
